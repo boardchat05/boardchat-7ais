@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>BoardChat - 7 AI Boardroom</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: auto; padding: 20px; background: #f8f9fa; }
+        h1 { color: #2c3e50; text-align: center; }
+        p { color: #34495e; }
+        form { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        label { display: block; margin: 10px 0; font-weight: bold; color: #2c3e50; }
+        input[type="text"], textarea { width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px; font-size: 16px; }
+        input[type="submit"] { background: #007bff; color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        input[type="submit"]:hover { background: #0056b3; }
+        pre { background: white; padding: 15px; border-radius: 8px; border: 1px solid #ced4da; white-space: pre-wrap; overflow: auto; }
+        h2 { color: #2c3e50; }
+        .note { font-size: 0.9em; color: #6c757d; }
+    </style>
+</head>
+<body>
+    <h1>BoardChat: 7-AI Boardroom</h1>
+    <p>Paste 2+ API keys and ask a question. The AIs propose answers, vote, and pick the best!</p>
+    <form method="post">
+        <label>OpenAI Key: <input type="text" name="openai_key" value="{{ ai_keys.get('openai', '') }}"> <span class="note">(platform.openai.com)</span></label>
+        <label>Gemini Key: <input type="text" name="gemini_key" value="{{ ai_keys.get('gemini', '') }}"> <span class="note">(ai.google.dev)</span></label>
+        <label>DeepSeek Key: <input type="text" name="deepseek_key" value="{{ ai_keys.get('deepseek', '') }}"> <span class="note">(platform.deepseek.com)</span></label>
+        <label>Claude Key: <input type="text" name="claude_key" value="{{ ai_keys.get('claude', '') }}"> <span class="note">(console.anthropic.com)</span></label>
+        <label>Grok Key: <input type="text" name="grok_key" value="{{ ai_keys.get('grok', '') }}"> <span class="note">(console.groq.com)</span></label>
+        <label>Llama Key: <input type="text" name="llama_key" value="{{ ai_keys.get('llama', '') }}"> <span class="note">(console.groq.com)</span></label>
+        <label>Mistral Key: <input type="text" name="mistral_key" value="{{ ai_keys.get('mistral', '') }}"> <span class="note">(console.mistral.ai)</span></label>
+        <label>Your Question: <textarea name="query" rows="4" required placeholder="e.g., Best budget travel tips?"></textarea></label>
+        <input type="submit" value="Convene Boardroom">
+    </form>
+    {% if result %}
+        <h2>Boardroom Verdict:</h2>
+        <pre>{{ result }}</pre>
+    {% endif %}
+</body>
+</html>
