@@ -4,14 +4,21 @@ import google.generativeai as genai
 import anthropic
 from groq import Groq
 import requests
+import os
 
 app = Flask(__name__)
 app.secret_key = 'boardchat2025rulez'
 
+# Clear any proxy env vars to prevent interference
+os.environ.pop('HTTP_PROXY', None)
+os.environ.pop('HTTPS_PROXY', None)
+os.environ.pop('http_proxy', None)
+os.environ.pop('https_proxy', None)
+
 AI_CONFIGS = {
     'openai': {
         'model': 'gpt-4o-mini',
-        'client': lambda key: OpenAI(api_key=key, proxies=None),
+        'client': lambda key: OpenAI(api_key=key),
         'generate': lambda client, prompt: client.chat.completions.create(model=AI_CONFIGS['openai']['model'], messages=[{"role": "user", "content": prompt}]).choices[0].message.content
     },
     'gemini': {
@@ -21,7 +28,7 @@ AI_CONFIGS = {
     },
     'deepseek': {
         'model': 'deepseek-chat',
-        'client': lambda key: OpenAI(api_key=key, base_url="https://api.deepseek.com", proxies=None),
+        'client': lambda key: OpenAI(api_key=key, base_url="https://api.deepseek.com"),
         'generate': lambda client, prompt: client.chat.completions.create(model=AI_CONFIGS['deepseek']['model'], messages=[{"role": "user", "content": prompt}]).choices[0].message.content
     },
     'claude': {
@@ -31,7 +38,7 @@ AI_CONFIGS = {
     },
     'grok': {
         'model': 'grok-3-beta',
-        'client': lambda key: Groq(api_key=key, proxies=None),
+        'client': lambda key: Groq(api_key=key),
         'generate': lambda client, prompt: client.chat.completions.create(model=AI_CONFIGS['grok']['model'], messages=[{"role": "user", "content": prompt}]).choices[0].message.content
     },
     'llama': {
