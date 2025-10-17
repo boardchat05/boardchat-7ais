@@ -30,9 +30,11 @@ AI_CONFIGS = {
         'generate': lambda client, prompt: client.messages.create(model=AI_CONFIGS['claude']['model'], max_tokens=1000, messages=[{"role": "user", "content": prompt}]).content[0].text
     },
     'grok': {
-        'model': 'mixtral-8x7b-32768',  # Updated to a valid Groq model
-        'client': lambda key: Groq(api_key=key),
-        'generate': lambda client, prompt: client.chat.completions.create(model=AI_CONFIGS['grok']['model'], messages=[{"role": "user", "content": prompt}]).choices[0].message.content
+        'model': 'mistral-large-2',  # Replace Grok with Mistral using your key
+        'endpoint': 'https://api.mistral.ai/v1/chat/completions',
+        'generate': lambda key, prompt: requests.post(AI_CONFIGS['grok']['endpoint'], headers={'Authorization': f'Bearer {key}'}, json={
+            'model': AI_CONFIGS['grok']['model'], 'messages': [{'role': 'user', 'content': prompt}]
+        }).json()['choices'][0]['message']['content']
     },
     'llama': {
         'model': 'meta-llama/llama-4-70b-instruct',
@@ -42,10 +44,17 @@ AI_CONFIGS = {
         }).json()['choices'][0]['message']['content']
     },
     'mistral': {
-        'model': 'mistral-large-latest',
+        'model': 'mistral-large-2',  # Keep Mistral as is (your key already works here)
         'endpoint': 'https://api.mistral.ai/v1/chat/completions',
         'generate': lambda key, prompt: requests.post(AI_CONFIGS['mistral']['endpoint'], headers={'Authorization': f'Bearer {key}'}, json={
             'model': AI_CONFIGS['mistral']['model'], 'messages': [{'role': 'user', 'content': prompt}]
+        }).json()['choices'][0]['message']['content']
+    },
+    'together': {
+        'model': 'qwen/qwen2.5-72b-instruct',  # Replace DeepSeek with Together AI
+        'endpoint': 'https://api.together.xyz/v1/chat/completions',
+        'generate': lambda key, prompt: requests.post(AI_CONFIGS['together']['endpoint'], headers={'Authorization': f'Bearer {key}'}, json={
+            'model': AI_CONFIGS['together']['model'], 'messages': [{'role': 'user', 'content': prompt}]
         }).json()['choices'][0]['message']['content']
     }
 }
