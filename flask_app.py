@@ -11,7 +11,7 @@ app.secret_key = 'boardchat2025rulez'
 AI_CONFIGS = {
     'openai': {
         'model': 'gpt-4o-mini',
-        'client': lambda key: OpenAI(api_key=key),
+        'client': lambda key: OpenAI(api_key=key, proxies=None),
         'generate': lambda client, prompt: client.chat.completions.create(model=AI_CONFIGS['openai']['model'], messages=[{"role": "user", "content": prompt}]).choices[0].message.content
     },
     'gemini': {
@@ -21,7 +21,7 @@ AI_CONFIGS = {
     },
     'deepseek': {
         'model': 'deepseek-chat',
-        'client': lambda key: OpenAI(api_key=key, base_url="https://api.deepseek.com"),
+        'client': lambda key: OpenAI(api_key=key, base_url="https://api.deepseek.com", proxies=None),
         'generate': lambda client, prompt: client.chat.completions.create(model=AI_CONFIGS['deepseek']['model'], messages=[{"role": "user", "content": prompt}]).choices[0].message.content
     },
     'claude': {
@@ -31,7 +31,7 @@ AI_CONFIGS = {
     },
     'grok': {
         'model': 'grok-3-beta',
-        'client': lambda key: Groq(api_key=key),
+        'client': lambda key: Groq(api_key=key, proxies=None),
         'generate': lambda client, prompt: client.chat.completions.create(model=AI_CONFIGS['grok']['model'], messages=[{"role": "user", "content": prompt}]).choices[0].message.content
     },
     'llama': {
