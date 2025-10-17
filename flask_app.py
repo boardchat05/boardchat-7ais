@@ -30,7 +30,7 @@ AI_CONFIGS = {
         'generate': lambda client, prompt: client.messages.create(model=AI_CONFIGS['claude']['model'], max_tokens=1000, messages=[{"role": "user", "content": prompt}]).content[0].text
     },
     'grok': {
-        'model': 'grok-3-beta',
+        'model': 'grok-beta',
         'client': lambda key: Groq(api_key=key),
         'generate': lambda client, prompt: client.chat.completions.create(model=AI_CONFIGS['grok']['model'], messages=[{"role": "user", "content": prompt}]).choices[0].message.content
     },
