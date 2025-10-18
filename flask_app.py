@@ -73,6 +73,7 @@ def index():
 if __name__ == '__main__':
     app.run(debug=True)
     @app.route('/tools', methods=['GET'])
+@app.route('/tools', methods=['GET'])
 def tools():
     return render_template('tools.html')
 
