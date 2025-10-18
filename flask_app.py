@@ -17,12 +17,10 @@ AI_CONFIGS = {
         'client': lambda key: (genai.configure(api_key=key), genai.GenerativeModel(AI_CONFIGS['gemini']['model']))[1],
         'generate': lambda client, prompt: client.generate_content(prompt).text
     },
-    'mistral': {
-        'model': 'mistral-large-2',
-        'endpoint': 'https://api.mistral.ai/v1/chat/completions',
-        'generate': lambda key, prompt: requests.post(AI_CONFIGS['mistral']['endpoint'], headers={'Authorization': f'Bearer {key}'}, json={
-            'model': AI_CONFIGS['mistral']['model'], 'messages': [{'role': 'user', 'content': prompt}]
-        }).json()['choices'][0]['message']['content']
+    'deepseek': {
+        'model': 'deepseek-chat',
+        'endpoint': 'https://puter.js/deepseek?prompt={prompt}',  # Free Puter.js endpoint (no key needed)
+        'generate': lambda key, prompt: requests.get(AI_CONFIGS['deepseek']['endpoint'].format(prompt=prompt)).json()['response']
     }
 }
 
