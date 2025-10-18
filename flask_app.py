@@ -17,10 +17,12 @@ AI_CONFIGS = {
         'client': lambda key: (genai.configure(api_key=key), genai.GenerativeModel(AI_CONFIGS['gemini']['model']))[1],
         'generate': lambda client, prompt: client.generate_content(prompt).text
     },
-    'deepseek': {
-        'model': 'deepseek-chat',
-        'endpoint': 'https://puter.js/deepseek?prompt={prompt}',  # Free Puter.js endpoint
-        'generate': lambda key, prompt: requests.get(AI_CONFIGS['deepseek']['endpoint'].format(prompt=prompt)).json()['response']
+    'openrouter': {
+        'model': 'deepseek/deepseek-r1:free',  # Free DeepSeek R1 variant
+        'endpoint': 'https://openrouter.ai/api/v1/chat/completions',
+        'generate': lambda key, prompt: requests.post(AI_CONFIGS['openrouter']['endpoint'], headers={'Authorization': f'Bearer {key}'}, json={
+            'model': AI_CONFIGS['openrouter']['model'], 'messages': [{'role': 'user', 'content': prompt}]
+        }).json()['choices'][0]['message']['content']
     }
 }
 
