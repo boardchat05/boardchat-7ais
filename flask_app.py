@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template, session
 from openai import OpenAI
 import google.generativeai as genai
+from anthropic import Anthropic
 
 app = Flask(__name__)
 app.secret_key = 'boardchat2025rulez'
@@ -15,6 +16,11 @@ AI_CONFIGS = {
         'model': 'gemini-2.5-flash',
         'client': lambda key: (genai.configure(api_key=key), genai.GenerativeModel(AI_CONFIGS['gemini']['model']))[1],
         'generate': lambda client, prompt: client.generate_content(prompt).text
+    },
+    'anthropic': {
+        'model': 'claude-3-haiku-20240307',
+        'client': lambda key: Anthropic(api_key=key),
+        'generate': lambda client, prompt: client.messages.create(model=AI_CONFIGS['anthropic']['model'], max_tokens=1000, messages=[{"role": "user", "content": prompt}]).content[0].text
     }
 }
 
@@ -78,7 +84,7 @@ def tools():
 @app.route('/idea_eval', methods=['GET', 'POST'])
 def idea_eval():
     result = None
-    ai_keys = {ai: session.get(f'{ai}_key', '') for ai in AI_CONFIGS.keys()}  # Fixed here
+    ai_keys = {ai: session.get(f'{ai}_key', '') for ai in AI_CONFIGS.keys()}
     if request.method == 'POST':
         query = request.form.get('query')
         if query:
@@ -129,7 +135,7 @@ def idea_eval():
 @app.route('/market_research', methods=['GET', 'POST'])
 def market_research():
     result = None
-    ai_keys = {ai: session.get(f'{ai}_key', '') for ai in AI_CONFIGS.keys()}  # Fixed here
+    ai_keys = {ai: session.get(f'{ai}_key', '') for ai in AI_CONFIGS.keys()}
     if request.method == 'POST':
         query = request.form.get('query')
         if query:
@@ -180,7 +186,7 @@ def market_research():
 @app.route('/competitive_analysis', methods=['GET', 'POST'])
 def competitive_analysis():
     result = None
-    ai_keys = {ai: session.get(f'{ai}_key', '') for ai in AI_CONFIGS.keys()}  # Fixed here
+    ai_keys = {ai: session.get(f'{ai}_key', '') for ai in AI_CONFIGS.keys()}
     if request.method == 'POST':
         query = request.form.get('query')
         if query:
@@ -231,7 +237,7 @@ def competitive_analysis():
 @app.route('/financial_projections', methods=['GET', 'POST'])
 def financial_projections():
     result = None
-    ai_keys = {ai: session.get(f'{ai}_key', '') for ai in AI_CONFIGS.keys()}  # Fixed here
+    ai_keys = {ai: session.get(f'{ai}_key', '') for ai in AI_CONFIGS.keys()}
     if request.method == 'POST':
         query = request.form.get('query')
         if query:
