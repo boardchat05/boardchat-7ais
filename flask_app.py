@@ -19,7 +19,7 @@ AI_CONFIGS = {
     },
     'deepseek': {
         'model': 'deepseek-chat',
-        'endpoint': 'https://puter.js/deepseek?prompt={prompt}',  # Free Puter.js endpoint (no key needed)
+        'endpoint': 'https://puter.js/deepseek?prompt={prompt}',  # Free Puter.js endpoint
         'generate': lambda key, prompt: requests.get(AI_CONFIGS['deepseek']['endpoint'].format(prompt=prompt)).json()['response']
     }
 }
