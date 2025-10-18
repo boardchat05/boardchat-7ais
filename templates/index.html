@@ -1,16 +1,20 @@
 <!DOCTYPE html>
 <html>
-<head><title>BoardChat</title></head>
+<head><title>BoardChat AI Boardroom</title></head>
 <body>
-    <h1>BoardChat - AI Boardroom</h1>
+    <h1>BoardChat AI Boardroom</h1>
+    <p>Welcome to the Boardroom! Enter your query and AI keys below to get started.</p>
     <form method="post">
         <label>OpenAI Key: <input type="text" name="openai_key" value="{{ ai_keys.get('openai', '') }}"> <span class="note">(platform.openai.com)</span></label><br>
         <label>Gemini Key: <input type="text" name="gemini_key" value="{{ ai_keys.get('gemini', '') }}"> <span class="note">(aistudio.google.com)</span></label><br>
-        <label>Question: <input type="text" name="query" size="50"></label><br>
-        <input type="submit" value="Convene Boardroom">
+        <label>Query: <input type="text" name="query" size="50"></label><br>
+        <input type="submit" value="Get Boardroom Decision">
     </form>
     {% if result %}
         <pre>{{ result }}</pre>
     {% endif %}
+    <div class="nav">
+        <a href="/tools">Go to Tools</a>
+    </div>
 </body>
 </html>
