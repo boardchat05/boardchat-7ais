@@ -1,8 +1,6 @@
 from flask import Flask, request, render_template, session
 from openai import OpenAI
 import google.generativeai as genai
-import anthropic
-from groq import Groq
 import requests
 
 app = Flask(__name__)
@@ -19,42 +17,11 @@ AI_CONFIGS = {
         'client': lambda key: (genai.configure(api_key=key), genai.GenerativeModel(AI_CONFIGS['gemini']['model']))[1],
         'generate': lambda client, prompt: client.generate_content(prompt).text
     },
-    'deepseek': {
-        'model': 'deepseek-chat',
-        'client': lambda key: OpenAI(api_key=key, base_url="https://api.deepseek.com"),
-        'generate': lambda client, prompt: client.chat.completions.create(model=AI_CONFIGS['deepseek']['model'], messages=[{"role": "user", "content": prompt}]).choices[0].message.content
-    },
-    'claude': {
-        'model': 'claude-3.7-sonnet-20250219',
-        'client': lambda key: anthropic.Anthropic(api_key=key),
-        'generate': lambda client, prompt: client.messages.create(model=AI_CONFIGS['claude']['model'], max_tokens=1000, messages=[{"role": "user", "content": prompt}]).content[0].text
-    },
-    'grok': {
-        'model': 'mistral-large-2',  # Replace Grok with Mistral using your key
-        'endpoint': 'https://api.mistral.ai/v1/chat/completions',
-        'generate': lambda key, prompt: requests.post(AI_CONFIGS['grok']['endpoint'], headers={'Authorization': f'Bearer {key}'}, json={
-            'model': AI_CONFIGS['grok']['model'], 'messages': [{'role': 'user', 'content': prompt}]
-        }).json()['choices'][0]['message']['content']
-    },
-    'llama': {
-        'model': 'meta-llama/llama-4-70b-instruct',
-        'endpoint': 'https://api.groq.com/openai/v1/chat/completions',
-        'generate': lambda key, prompt: requests.post(AI_CONFIGS['llama']['endpoint'], headers={'Authorization': f'Bearer {key}'}, json={
-            'model': AI_CONFIGS['llama']['model'], 'messages': [{'role': 'user', 'content': prompt}]
-        }).json()['choices'][0]['message']['content']
-    },
     'mistral': {
-        'model': 'mistral-large-2',  # Keep Mistral as is (your key already works here)
+        'model': 'mistral-large-2',
         'endpoint': 'https://api.mistral.ai/v1/chat/completions',
         'generate': lambda key, prompt: requests.post(AI_CONFIGS['mistral']['endpoint'], headers={'Authorization': f'Bearer {key}'}, json={
             'model': AI_CONFIGS['mistral']['model'], 'messages': [{'role': 'user', 'content': prompt}]
-        }).json()['choices'][0]['message']['content']
-    },
-    'together': {
-        'model': 'qwen/qwen2.5-72b-instruct',  # Replace DeepSeek with Together AI
-        'endpoint': 'https://api.together.xyz/v1/chat/completions',
-        'generate': lambda key, prompt: requests.post(AI_CONFIGS['together']['endpoint'], headers={'Authorization': f'Bearer {key}'}, json={
-            'model': AI_CONFIGS['together']['model'], 'messages': [{'role': 'user', 'content': prompt}]
         }).json()['choices'][0]['message']['content']
     }
 }
