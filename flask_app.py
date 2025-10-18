@@ -68,11 +68,9 @@ def index():
                     f"---\n\n**All {len(ai_list)} Proposals:**\n"
                     f"{'\n\n'.join([f'**{ai.upper()}:**\n{resp}' for ai, resp in responses.items()])}"
                 )
+
     return render_template('index.html', result=result, ai_keys=ai_keys)
 
-if __name__ == '__main__':
-    app.run(debug=True)
-    @app.route('/tools', methods=['GET'])
 @app.route('/tools', methods=['GET'])
 def tools():
     return render_template('tools.html')
@@ -127,3 +125,6 @@ def idea_eval():
                     f"{'\n\n'.join([f'**{ai.upper()}:**\n{resp}' for ai, resp in responses.items()])}"
                 )
     return render_template('idea_eval.html', result=result, ai_keys=ai_keys)
+
+if __name__ == '__main__':
+    app.run(debug=True)
