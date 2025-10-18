@@ -6,7 +6,7 @@
     <form method="post">
         <label>OpenAI Key: <input type="text" name="openai_key" value="{{ ai_keys.get('openai', '') }}"> <span class="note">(platform.openai.com)</span></label><br>
         <label>Gemini Key: <input type="text" name="gemini_key" value="{{ ai_keys.get('gemini', '') }}"> <span class="note">(aistudio.google.com)</span></label><br>
-        <label>Mistral Key: <input type="text" name="mistral_key" value="{{ ai_keys.get('mistral', '') }}"> <span class="note">(console.mistral.ai)</span></label><br>
+        <label>DeepSeek Key: <input type="text" name="deepseek_key" value="{{ ai_keys.get('deepseek', '') }}" placeholder="Optional with Puter.js"> <span class="note">(platform.deepseek.com, optional)</span></label><br>
         <label>Question: <input type="text" name="query" size="50"></label><br>
         <input type="submit" value="Convene Boardroom">
     </form>
