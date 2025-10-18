@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head><title>BoardChat Market Research Summarizer</title></head>
+<body>
+    <h1>BoardChat Market Research Summarizer</h1>
+    <form method="post">
+        <label>OpenAI Key: <input type="text" name="openai_key" value="{{ ai_keys.get('openai', '') }}"> <span class="note">(platform.openai.com)</span></label><br>
+        <label>Gemini Key: <input type="text" name="gemini_key" value="{{ ai_keys.get('gemini', '') }}"> <span class="note">(aistudio.google.com)</span></label><br>
+        <label>Market Topic: <input type="text" name="query" size="50"></label><br>
+        <input type="submit" value="Summarize Research">
+    </form>
+    {% if result %}
+        <pre>{{ result }}</pre>
+    {% endif }
+    <a href="/tools">Back to Tools</a> | <a href="/">Back to Boardroom</a>
+</body>
+</html>
