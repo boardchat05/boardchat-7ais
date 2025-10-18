@@ -78,7 +78,7 @@ def tools():
 @app.route('/idea_eval', methods=['GET', 'POST'])
 def idea_eval():
     result = None
-    ai_keys = {ai: session.get(f'{ai}_key', '') for ai in AI_CONFIGS.items()}
+    ai_keys = {ai: session.get(f'{ai}_key', '') for ai in AI_CONFIGS.keys()}  # Fixed here
     if request.method == 'POST':
         query = request.form.get('query')
         if query:
@@ -129,7 +129,7 @@ def idea_eval():
 @app.route('/market_research', methods=['GET', 'POST'])
 def market_research():
     result = None
-    ai_keys = {ai: session.get(f'{ai}_key', '') for ai in AI_CONFIGS.items()}
+    ai_keys = {ai: session.get(f'{ai}_key', '') for ai in AI_CONFIGS.keys()}  # Fixed here
     if request.method == 'POST':
         query = request.form.get('query')
         if query:
@@ -180,7 +180,7 @@ def market_research():
 @app.route('/competitive_analysis', methods=['GET', 'POST'])
 def competitive_analysis():
     result = None
-    ai_keys = {ai: session.get(f'{ai}_key', '') for ai in AI_CONFIGS.items()}
+    ai_keys = {ai: session.get(f'{ai}_key', '') for ai in AI_CONFIGS.keys()}  # Fixed here
     if request.method == 'POST':
         query = request.form.get('query')
         if query:
@@ -231,7 +231,7 @@ def competitive_analysis():
 @app.route('/financial_projections', methods=['GET', 'POST'])
 def financial_projections():
     result = None
-    ai_keys = {ai: session.get(f'{ai}_key', '') for ai in AI_CONFIGS.items()}
+    ai_keys = {ai: session.get(f'{ai}_key', '') for ai in AI_CONFIGS.keys()}  # Fixed here
     if request.method == 'POST':
         query = request.form.get('query')
         if query:
