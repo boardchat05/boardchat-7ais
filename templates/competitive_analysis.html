@@ -7,7 +7,7 @@
         <label>OpenAI Key: <input type="text" name="openai_key" value="{{ ai_keys.get('openai', '') }}"> <span class="note">(platform.openai.com)</span></label><br>
         <label>Gemini Key: <input type="text" name="gemini_key" value="{{ ai_keys.get('gemini', '') }}"> <span class="note">(aistudio.google.com)</span></label><br>
         <label>Business/Competitor: <input type="text" name="query" size="50"></label><br>
-        <label>Anthropic Key: <input type="text" name="anthropic_key" value="{{ ai_keys.get('anthropic', '') }}"> <span class="note">(console.anthropic.com)</span></label><br>
+        <label>HuggingFace Key: <input type="text" name="huggingface_key" value="{{ ai_keys.get('huggingface', '') }}"> <span class="note">(huggingface.co)</span></label><br>
         <input type="submit" value="Analyze Competitors">
     </form>
     {% if result %}
