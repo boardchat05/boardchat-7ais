@@ -1,7 +1,6 @@
 from flask import Flask, request, render_template, session
 from openai import OpenAI
 import google.generativeai as genai
-import requests
 
 app = Flask(__name__)
 app.secret_key = 'boardchat2025rulez'
@@ -16,13 +15,6 @@ AI_CONFIGS = {
         'model': 'gemini-2.5-flash',
         'client': lambda key: (genai.configure(api_key=key), genai.GenerativeModel(AI_CONFIGS['gemini']['model']))[1],
         'generate': lambda client, prompt: client.generate_content(prompt).text
-    },
-    'openrouter': {
-        'model': 'deepseek/deepseek-r1:free',  # Free DeepSeek R1 variant
-        'endpoint': 'https://openrouter.ai/api/v1/chat/completions',
-        'generate': lambda key, prompt: requests.post(AI_CONFIGS['openrouter']['endpoint'], headers={'Authorization': f'Bearer {key}'}, json={
-            'model': AI_CONFIGS['openrouter']['model'], 'messages': [{'role': 'user', 'content': prompt}]
-        }).json()['choices'][0]['message']['content']
     }
 }
 
@@ -53,37 +45,3 @@ def index():
                         responses[ai] = f"Error from {ai.upper()}: {str(e)}"
 
                 ai_list = list(responses.keys())
-                numbered_responses = "\n".join([f"{i+1}. {ai.upper()}: {responses[ai]}" for i, ai in enumerate(ai_list)])
-                vote_prompt = (
-                    f"Boardroom vote for best answer to: '{query}'\nProposals:\n{numbered_responses}\n"
-                    f"Vote for the most accurate, clear, relevant answer. Reply ONLY with the number (1-{len(ai_list)})."
-                )
-
-                votes = {i+1: 0 for i in range(len(ai_list))}
-                for ai, config in active_ais.items():
-                    try:
-                        key = session[f'{ai}_key']
-                        if 'endpoint' in config:
-                            vote = config['generate'](key, vote_prompt)
-                        else:
-                            client = config['client'](key)
-                            vote = config['generate'](client, vote_prompt)
-                        num = int(vote.strip())
-                        if 1 <= num <= len(ai_list):
-                            votes[num] += 1
-                    except (ValueError, Exception):
-                        pass
-
-                best_num = max(votes, key=votes.get)
-                best_ai = ai_list[best_num - 1].upper()
-                best_answer = responses[best_ai.lower()]
-                result = (
-                    f"**Boardroom Decision ({votes[best_num]} votes):** {best_ai} wins!\n\n{best_answer}\n\n"
-                    f"---\n\n**All {len(ai_list)} Proposals:**\n"
-                    f"{'\n\n'.join([f'**{ai.upper()}:**\n{resp}' for ai, resp in responses.items()])}"
-                )
-
-    return render_template('index.html', result=result, ai_keys=ai_keys)
-
-if __name__ == '__main__':
-    app.run(debug=True)
