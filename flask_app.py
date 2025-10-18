@@ -1,7 +1,7 @@
 from flask import Flask, request, render_template, session
 from openai import OpenAI
 import google.generativeai as genai
-from anthropic import Anthropic
+import requests
 
 app = Flask(__name__)
 app.secret_key = 'boardchat2025rulez'
@@ -17,10 +17,10 @@ AI_CONFIGS = {
         'client': lambda key: (genai.configure(api_key=key), genai.GenerativeModel(AI_CONFIGS['gemini']['model']))[1],
         'generate': lambda client, prompt: client.generate_content(prompt).text
     },
-    'anthropic': {
-        'model': 'claude-3-haiku-20240307',
-        'client': lambda key: Anthropic(api_key=key),
-        'generate': lambda client, prompt: client.messages.create(model=AI_CONFIGS['anthropic']['model'], max_tokens=1000, messages=[{"role": "user", "content": prompt}]).content[0].text
+    'huggingface': {
+        'model': 'google/gemma-2-9b',
+        'endpoint': 'https://api-inference.huggingface.co/models/google/gemma-2-9b',
+        'generate': lambda key, prompt: requests.post(AI_CONFIGS['huggingface']['endpoint'], headers={'Authorization': f'Bearer {key}'}, json={'inputs': prompt}).json()[0]['generated_text']
     }
 }
 
