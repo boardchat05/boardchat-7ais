@@ -6,12 +6,7 @@
     <form method="post">
         <label>OpenAI Key: <input type="text" name="openai_key" value="{{ ai_keys.get('openai', '') }}"> <span class="note">(platform.openai.com)</span></label><br>
         <label>Gemini Key: <input type="text" name="gemini_key" value="{{ ai_keys.get('gemini', '') }}"> <span class="note">(aistudio.google.com)</span></label><br>
-        <label>Claude Key: <input type="text" name="claude_key" value="{{ ai_keys.get('claude', '') }}"> <span class="note">(console.anthropic.com)</span></label><br>
-        <label>DeepSeek Key: <input type="text" name="deepseek_key" value="{{ ai_keys.get('deepseek', '') }}"> <span class="note">(platform.deepseek.com)</span></label><br>
-        <label>Grok Key: <input type="text" name="grok_key" value="{{ ai_keys.get('grok', '') }}"> <span class="note">(console.groq.com)</span></label><br>
-        <label>Llama Key: <input type="text" name="llama_key" value="{{ ai_keys.get('llama', '') }}"> <span class="note">(console.groq.com)</span></label><br>
         <label>Mistral Key: <input type="text" name="mistral_key" value="{{ ai_keys.get('mistral', '') }}"> <span class="note">(console.mistral.ai)</span></label><br>
-        <label>Together Key: <input type="text" name="together_key" value="{{ ai_keys.get('together', '') }}"> <span class="note">(together.ai)</span></label><br>
         <label>Question: <input type="text" name="query" size="50"></label><br>
         <input type="submit" value="Convene Boardroom">
     </form>
