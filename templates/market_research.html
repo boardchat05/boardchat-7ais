@@ -6,7 +6,7 @@
     <form method="post">
         <label>OpenAI Key: <input type="text" name="openai_key" value="{{ ai_keys.get('openai', '') }}"> <span class="note">(platform.openai.com)</span></label><br>
         <label>Gemini Key: <input type="text" name="gemini_key" value="{{ ai_keys.get('gemini', '') }}"> <span class="note">(aistudio.google.com)</span></label><br>
-        <label>HuggingFace Key: <input type="text" name="huggingface_key" value="{{ ai_keys.get('huggingface', '') }}"> <span class="note">(huggingface.co)</span></label><br>
+        <label>Replicate Key: <input type="text" name="replicate_key" value="{{ ai_keys.get('replicate', '') }}"> <span class="note">(replicate.com)</span></label><br>
         <label>Market Topic: <input type="text" name="query" size="50"></label><br>
         <input type="submit" value="Summarize Market Research">
     </form>
