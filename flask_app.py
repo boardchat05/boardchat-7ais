@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template, session
 from openai import OpenAI
 import google.generativeai as genai
+import requests
 
 app = Flask(__name__)
 app.secret_key = 'boardchat2025rulez'
@@ -16,10 +17,13 @@ AI_CONFIGS = {
         'client': lambda key: (genai.configure(api_key=key), genai.GenerativeModel(AI_CONFIGS['gemini']['model']))[1],
         'generate': lambda client, prompt: client.generate_content(prompt).text
     },
-    'grok': {
-        'model': 'grok-3-mini',
-        'client': lambda key: OpenAI(api_key=key, base_url="https://api.x.ai/v1"),
-        'generate': lambda client, prompt: client.chat.completions.create(model=AI_CONFIGS['grok']['model'], messages=[{"role": "user", "content": prompt}]).choices[0].message.content
+    'llama': {
+        'model': 'meta-llama/llama-4-maverick:free',
+        'endpoint': 'https://openrouter.ai/api/v1/chat/completions',
+        'generate': lambda key, prompt: requests.post(AI_CONFIGS['llama']['endpoint'], headers={'Authorization': f'Bearer {key}'}, json={
+            'model': AI_CONFIGS['llama']['model'],
+            'messages': [{'role': 'user', 'content': prompt}]
+        }).json()['choices'][0]['message']['content']
     }
 }
 
@@ -40,8 +44,11 @@ def index():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        client = config['client'](key)
-                        resp = config['generate'](client, query)
+                        if ai == 'llama':
+                            resp = config['generate'](key, query)
+                        else:
+                            client = config['client'](key)
+                            resp = config['generate'](client, query)
                         responses[ai] = resp
                     except Exception as e:
                         responses[ai] = f"Error from {ai.upper()}: {str(e)}"
@@ -57,8 +64,11 @@ def index():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        client = config['client'](key)
-                        vote = config['generate'](client, vote_prompt)
+                        if ai == 'llama':
+                            vote = config['generate'](key, vote_prompt)
+                        else:
+                            client = config['client'](key)
+                            vote = config['generate'](client, vote_prompt)
                         num = int(vote.strip())
                         if 1 <= num <= len(ai_list):
                             votes[num] += 1
@@ -71,7 +81,7 @@ def index():
                 result = (
                     f"**Boardroom Decision ({votes[best_num]} votes):** {best_ai} wins!\n\n{best_answer}\n\n"
                     f"---\n\n**All {len(ai_list)} Proposals:**\n"
-                    f"{'\n\n'.join([f'**{ai.upper()}:**\n{resp}' for i, resp in responses.items()])}"
+                    f"{'\n\n'.join([f'**{ai.upper()}:**\n{resp}' for ai, resp in responses.items()])}"
                 )
 
     return render_template('index.html', result=result, ai_keys=ai_keys)
@@ -96,8 +106,11 @@ def idea_eval():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        client = config['client'](key)
-                        resp = config['generate'](client, prompt)
+                        if ai == 'llama':
+                            resp = config['generate'](key, prompt)
+                        else:
+                            client = config['client'](key)
+                            resp = config['generate'](client, prompt)
                         responses[ai] = resp
                     except Exception as e:
                         responses[ai] = f"Error from {ai.upper()}: {str(e)}"
@@ -113,8 +126,11 @@ def idea_eval():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        client = config['client'](key)
-                        vote = config['generate'](client, vote_prompt)
+                        if ai == 'llama':
+                            vote = config['generate'](key, vote_prompt)
+                        else:
+                            client = config['client'](key)
+                            vote = config['generate'](client, vote_prompt)
                         num = int(vote.strip())
                         if 1 <= num <= len(ai_list):
                             votes[num] += 1
@@ -127,7 +143,7 @@ def idea_eval():
                 result = (
                     f"**Best Business Idea ({votes[best_num]} votes):** {best_ai} wins!\n\n{best_answer}\n\n"
                     f"---\n\n**All {len(ai_list)} Evaluations:**\n"
-                    f"{'\n\n'.join([f'**{ai.upper()}:**\n{resp}' for i, resp in responses.items()])}"
+                    f"{'\n\n'.join([f'**{ai.upper()}:**\n{resp}' for ai, resp in responses.items()])}"
                 )
     return render_template('idea_eval.html', result=result, ai_keys=ai_keys)
 
@@ -147,8 +163,11 @@ def market_research():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        client = config['client'](key)
-                        resp = config['generate'](client, prompt)
+                        if ai == 'llama':
+                            resp = config['generate'](key, prompt)
+                        else:
+                            client = config['client'](key)
+                            resp = config['generate'](client, prompt)
                         responses[ai] = resp
                     except Exception as e:
                         responses[ai] = f"Error from {ai.upper()}: {str(e)}"
@@ -160,12 +179,15 @@ def market_research():
                     f"Vote for the most insightful and accurate summary. Reply ONLY with the number (1-{len(ai_list)})."
                 )
 
-                votes = {i+1: 0 for i in range(len(ai_list))}
+                votes = {i+1: 0 for i in range(len(ai_list)})
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        client = config['client'](key)
-                        vote = config['generate'](client, vote_prompt)
+                        if ai == 'llama':
+                            vote = config['generate'](key, vote_prompt)
+                        else:
+                            client = config['client'](key)
+                            vote = config['generate'](client, vote_prompt)
                         num = int(vote.strip())
                         if 1 <= num <= len(ai_list):
                             votes[num] += 1
@@ -178,7 +200,7 @@ def market_research():
                 result = (
                     f"**Best Market Research ({votes[best_num]} votes):** {best_ai} wins!\n\n{best_answer}\n\n"
                     f"---\n\n**All {len(ai_list)} Summaries:**\n"
-                    f"{'\n\n'.join([f'**{ai.upper()}:**\n{resp}' for i, resp in responses.items()])}"
+                    f"{'\n\n'.join([f'**{ai.upper()}:**\n{resp}' for ai, resp in responses.items()])}"
                 )
     return render_template('market_research.html', result=result, ai_keys=ai_keys)
 
@@ -198,8 +220,11 @@ def competitive_analysis():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        client = config['client'](key)
-                        resp = config['generate'](client, prompt)
+                        if ai == 'llama':
+                            resp = config['generate'](key, prompt)
+                        else:
+                            client = config['client'](key)
+                            resp = config['generate'](client, prompt)
                         responses[ai] = resp
                     except Exception as e:
                         responses[ai] = f"Error from {ai.upper()}: {str(e)}"
@@ -208,15 +233,18 @@ def competitive_analysis():
                 numbered_responses = "\n".join([f"{i+1}. {ai.upper()}: {responses[ai]}" for i, ai in enumerate(ai_list)])
                 vote_prompt = (
                     f"Vote for the best competitive analysis for: '{query}'\nAnalyses:\n{numbered_responses}\n"
-                    f"Voter for the most actionable and insightful analysis. Reply ONLY with the number (1-{len(ai_list)})."
+                    f"Vote for the most actionable and insightful analysis. Reply ONLY with the number (1-{len(ai_list)})."
                 )
 
                 votes = {i+1: 0 for i in range(len(ai_list))}
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        client = config['client'](key)
-                        vote = config['generate'](client, vote_prompt)
+                        if ai == 'llama':
+                            vote = config['generate'](key, vote_prompt)
+                        else:
+                            client = config['client'](key)
+                            vote = config['generate'](client, vote_prompt)
                         num = int(vote.strip())
                         if 1 <= num <= len(ai_list):
                             votes[num] += 1
@@ -229,7 +257,7 @@ def competitive_analysis():
                 result = (
                     f"**Best Competitive Analysis ({votes[best_num]} votes):** {best_ai} wins!\n\n{best_answer}\n\n"
                     f"---\n\n**All {len(ai_list)} Analyses:**\n"
-                    f"{'\n\n'.join([f'**{ai.upper()}:**\n{resp}' for i, resp in responses.items()])}"
+                    f"{'\n\n'.join([f'**{ai.upper()}:**\n{resp}' for ai, resp in responses.items()])}"
                 )
     return render_template('competitive_analysis.html', result=result, ai_keys=ai_keys)
 
@@ -249,8 +277,11 @@ def financial_projections():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        client = config['client'](key)
-                        resp = config['generate'](client, prompt)
+                        if ai == 'llama':
+                            resp = config['generate'](key, prompt)
+                        else:
+                            client = config['client'](key)
+                            resp = config['generate'](client, prompt)
                         responses[ai] = resp
                     except Exception as e:
                         responses[ai] = f"Error from {ai.upper()}: {str(e)}"
@@ -266,8 +297,11 @@ def financial_projections():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        client = config['client'](key)
-                        vote = config['generate'](client, vote_prompt)
+                        if ai == 'llama':
+                            vote = config['generate'](key, vote_prompt)
+                        else:
+                            client = config['client'](key)
+                            vote = config['generate'](client, vote_prompt)
                         num = int(vote.strip())
                         if 1 <= num <= len(ai_list):
                             votes[num] += 1
@@ -280,7 +314,7 @@ def financial_projections():
                 result = (
                     f"**Best Financial Projection ({votes[best_num]} votes):** {best_ai} wins!\n\n{best_answer}\n\n"
                     f"---\n\n**All {len(ai_list)} Projections:**\n"
-                    f"{'\n\n'.join([f'**{ai.upper()}:**\n{resp}' for i, resp in responses.items()])}"
+                    f"{'\n\n'.join([f'**{ai.upper()}:**\n{resp}' for ai, resp in responses.items()])}"
                 )
     return render_template('financial_projections.html', result=result, ai_keys=ai_keys)
 
