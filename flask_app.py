@@ -17,13 +17,13 @@ AI_CONFIGS = {
         'client': lambda key: (genai.configure(api_key=key), genai.GenerativeModel(AI_CONFIGS['gemini']['model']))[1],
         'generate': lambda client, prompt: client.generate_content(prompt).text
     },
-    'replicate': {
-        'model': 'meta/llama-2-70b-chat',
-        'endpoint': 'https://api.replicate.com/v1/predictions',
-        'generate': lambda key, prompt: requests.post(AI_CONFIGS['replicate']['endpoint'], headers={'Authorization': f'Token {key}'}, json={
-            'version': 'a9a1c2a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5',  # Llama 2 70B version ID
-            'input': {'prompt': prompt, 'max_length': 512}
-        }).json()['output']
+    'fal': {
+        'model': 'meta-llama-3.1-8b-instruct',
+        'endpoint': 'https://fal.run/fal-ai/llama-3.1-8b-instruct',
+        'generate': lambda key, prompt: requests.post(AI_CONFIGS['fal']['endpoint'], headers={'Authorization': f'Key {key}'}, json={
+            'prompt': prompt,
+            'max_tokens': 512
+        }).json()['text']
     }
 }
 
@@ -44,7 +44,7 @@ def index():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        if ai == 'replicate':
+                        if ai == 'fal':
                             resp = config['generate'](key, query)
                         else:
                             client = config['client'](key) if 'client' in config else None
@@ -64,7 +64,7 @@ def index():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        if ai == 'replicate':
+                        if ai == 'fal':
                             vote = config['generate'](key, vote_prompt)
                         else:
                             client = config['client'](key) if 'client' in config else None
@@ -106,7 +106,7 @@ def idea_eval():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        if ai == 'replicate':
+                        if ai == 'fal':
                             resp = config['generate'](key, prompt)
                         else:
                             client = config['client'](key) if 'client' in config else None
@@ -126,7 +126,7 @@ def idea_eval():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        if ai == 'replicate':
+                        if ai == 'fal':
                             vote = config['generate'](key, vote_prompt)
                         else:
                             client = config['client'](key) if 'client' in config else None
@@ -163,7 +163,7 @@ def market_research():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        if ai == 'replicate':
+                        if ai == 'fal':
                             resp = config['generate'](key, prompt)
                         else:
                             client = config['client'](key) if 'client' in config else None
@@ -183,7 +183,7 @@ def market_research():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        if ai == 'replicate':
+                        if ai == 'fal':
                             vote = config['generate'](key, vote_prompt)
                         else:
                             client = config['client'](key) if 'client' in config else None
@@ -220,7 +220,7 @@ def competitive_analysis():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        if ai == 'replicate':
+                        if ai == 'fal':
                             resp = config['generate'](key, prompt)
                         else:
                             client = config['client'](key) if 'client' in config else None
@@ -240,7 +240,7 @@ def competitive_analysis():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        if ai == 'replicate':
+                        if ai == 'fal':
                             vote = config['generate'](key, vote_prompt)
                         else:
                             client = config['client'](key) if 'client' in config else None
@@ -277,7 +277,7 @@ def financial_projections():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        if ai == 'replicate':
+                        if ai == 'fal':
                             resp = config['generate'](key, prompt)
                         else:
                             client = config['client'](key) if 'client' in config else None
@@ -297,7 +297,7 @@ def financial_projections():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        if ai == 'replicate':
+                        if ai == 'fal':
                             vote = config['generate'](key, vote_prompt)
                         else:
                             client = config['client'](key) if 'client' in config else None
