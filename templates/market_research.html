@@ -6,7 +6,7 @@
     <form method="post">
         <label>OpenAI Key: <input type="text" name="openai_key" value="{{ ai_keys.get('openai', '') }}"> <span class="note">(platform.openai.com)</span></label><br>
         <label>Gemini Key: <input type="text" name="gemini_key" value="{{ ai_keys.get('gemini', '') }}"> <span class="note">(aistudio.google.com)</span></label><br>
-        <label>Grok Key: <input type="text" name="grok_key" value="{{ ai_keys.get('grok', '') }}"> <span class="note">(console.x.ai)</span></label><br>
+        <label>Llama Key: <input type="text" name="llama_key" value="{{ ai_keys.get('llama', '') }}"> <span class="note">(openrouter.ai)</span></label><br>
         <label>Market Topic: <input type="text" name="query" size="50"></label><br>
         <input type="submit" value="Summarize Market Research">
     </form>
