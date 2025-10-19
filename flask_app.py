@@ -179,7 +179,7 @@ def market_research():
                     f"Vote for the most insightful and accurate summary. Reply ONLY with the number (1-{len(ai_list)})."
                 )
 
-                votes = {i+1: 0 for i in range(len(ai_list)})
+                votes = {i+1: 0 for i in range(len(ai_list))}
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
