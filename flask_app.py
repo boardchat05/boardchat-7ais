@@ -56,7 +56,7 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     try:
-        flow = InstalledAppFlow.from_client_secrets_file('/etc/secrets/credentials.json', scopes=['openid', 'email', 'profile'])
+        flow = InstalledAppFlow.from_client_secrets_file('/etc/secrets/credentials.json', scopes=['openid', 'https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile'])
         flow.redirect_uri = url_for('callback', _external=True)
         authorization_url, state = flow.authorization_url(access_type='offline', include_granted_scopes='true')
         session['state'] = state
@@ -75,7 +75,7 @@ def callback():
         return "Invalid state parameter", 400
     try:
         print("Starting callback process...")  # Debug
-        flow = InstalledAppFlow.from_client_secrets_file('/etc/secrets/credentials.json', scopes=['openid', 'email', 'profile'])
+        flow = InstalledAppFlow.from_client_secrets_file('/etc/secrets/credentials.json', scopes=['openid', 'https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile'])
         flow.redirect_uri = url_for('callback', _external=True)
         authorization_response = request.url
         print("Fetching token...")  # Debug
