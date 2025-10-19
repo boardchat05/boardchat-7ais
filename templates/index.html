@@ -1,21 +1,26 @@
 <!DOCTYPE html>
 <html>
-<head><title>BoardChat AI Boardroom</title></head>
+<head><title>BoardChat Home</title></head>
 <body>
-    <h1>BoardChat AI Boardroom</h1>
-    <p>Welcome to the Boardroom! Enter your query and AI keys below to get started.</p>
+    <h1>Welcome to BoardChat</h1>
+    <p>Choose your section to empower your business:</p>
+    <h2>BoardChat Business Tools</h2>
+    <ul>
+        <li><a href="/business_tools">Business Tools Overview</a></li>
+    </ul>
+    <h2>Corporate Titan Tools</h2>
+    <ul>
+        <li><a href="/corporate_titan_tools">Corporate Titan Tools Overview</a></li>
+    </ul>
     <form method="post">
         <label>OpenAI Key: <input type="text" name="openai_key" value="{{ ai_keys.get('openai', '') }}"> <span class="note">(platform.openai.com)</span></label><br>
         <label>Gemini Key: <input type="text" name="gemini_key" value="{{ ai_keys.get('gemini', '') }}"> <span class="note">(aistudio.google.com)</span></label><br>
         <label>Llama Key: <input type="text" name="llama_key" value="{{ ai_keys.get('llama', '') }}"> <span class="note">(openrouter.ai)</span></label><br>
         <label>Query: <input type="text" name="query" size="50"></label><br>
-        <input type="submit" value="Get Boardroom Decision">
+        <input type="submit" value="Convene Boardroom">
     </form>
     {% if result %}
         <pre>{{ result }}</pre>
     {% endif %}
-    <div class="nav">
-        <a href="/tools">Go to Tools</a>
-    </div>
 </body>
 </html>
