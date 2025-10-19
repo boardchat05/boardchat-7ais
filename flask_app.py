@@ -55,29 +55,46 @@ AI_CONFIGS = {
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
-    flow = InstalledAppFlow.from_client_secrets_file('/etc/secrets/credentials.json', scopes=['openid', 'email', 'profile'])
-    flow.redirect_uri = url_for('callback', _external=True)
-    authorization_url, state = flow.authorization_url(access_type='offline', include_granted_scopes='true')
-    session['state'] = state
-    return redirect(authorization_url)
+    try:
+        flow = InstalledAppFlow.from_client_secrets_file('/etc/secrets/credentials.json', scopes=['openid', 'email', 'profile'])
+        flow.redirect_uri = url_for('callback', _external=True)
+        authorization_url, state = flow.authorization_url(access_type='offline', include_granted_scopes='true')
+        session['state'] = state
+        print("Redirecting to Google auth...")  # Debug
+        return redirect(authorization_url)
+    except Exception as e:
+        print(f"Login error: {str(e)}")  # Debug
+        return "Login setup failed", 500
 
 @app.route('/callback')
 def callback():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     if 'state' not in session or session['state'] != request.args.get('state'):
+        print("Invalid state parameter")  # Debug
         return "Invalid state parameter", 400
-    flow = InstalledAppFlow.from_client_secrets_file('/etc/secrets/credentials.json', scopes=['openid', 'email', 'profile'])
-    flow.redirect_uri = url_for('callback', _external=True)
-    authorization_response = request.url
-    flow.fetch_token(authorization_response=authorization_response)
-    credentials = flow.credentials
-    session['credentials'] = credentials_to_dict(credentials)
-    user_info = requests.get('https://www.googleapis.com/userinfo/v2/me', headers={'Authorization': f'Bearer {credentials.token}'}).json()
-    user_id = user_info['email']
-    user = User(user_id)
-    login_user(user)
-    return redirect(url_for('index'))
+    try:
+        print("Starting callback process...")  # Debug
+        flow = InstalledAppFlow.from_client_secrets_file('/etc/secrets/credentials.json', scopes=['openid', 'email', 'profile'])
+        flow.redirect_uri = url_for('callback', _external=True)
+        authorization_response = request.url
+        print("Fetching token...")  # Debug
+        flow.fetch_token(authorization_response=authorization_response)
+        credentials = flow.credentials
+        print("Token fetched, getting user info...")  # Debug
+        session['credentials'] = credentials_to_dict(credentials)
+        user_info = requests.get('https://www.googleapis.com/userinfo/v2/me', headers={'Authorization': f'Bearer {credentials.token}'}).json()
+        user_id = user_info['email']
+        user = User(user_id)
+        login_user(user)
+        print(f"Logged in as {user_id}")  # Debug
+        return redirect(url_for('index'))
+    except FileNotFoundError:
+        print("Secret file not found at /etc/secrets/credentials.json")  # Debug
+        return "Configuration error: Check secret file", 500
+    except Exception as e:
+        print(f"Callback error: {str(e)}")  # Debug
+        return "Login failed due to server error", 500
 
 def credentials_to_dict(credentials):
     return {
