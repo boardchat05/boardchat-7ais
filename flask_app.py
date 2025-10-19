@@ -1,7 +1,7 @@
 from flask import Flask, request, render_template, session
 from openai import OpenAI
 import google.generativeai as genai
-from groq import Groq
+import requests
 
 app = Flask(__name__)
 app.secret_key = 'boardchat2025rulez'
@@ -17,10 +17,13 @@ AI_CONFIGS = {
         'client': lambda key: (genai.configure(api_key=key), genai.GenerativeModel(AI_CONFIGS['gemini']['model']))[1],
         'generate': lambda client, prompt: client.generate_content(prompt).text
     },
-    'groq': {
-        'model': 'llama3-70b-8192',
-        'client': lambda key: Groq(api_key=key),
-        'generate': lambda client, prompt: client.chat.completions.create(model=AI_CONFIGS['groq']['model'], messages=[{"role": "user", "content": prompt}]).choices[0].message.content
+    'replicate': {
+        'model': 'meta/llama-2-70b-chat',
+        'endpoint': 'https://api.replicate.com/v1/predictions',
+        'generate': lambda key, prompt: requests.post(AI_CONFIGS['replicate']['endpoint'], headers={'Authorization': f'Token {key}'}, json={
+            'version': 'a9a1c2a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5',  # Llama 2 70B version ID
+            'input': {'prompt': prompt, 'max_length': 512}
+        }).json()['output']
     }
 }
 
@@ -41,8 +44,11 @@ def index():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        client = config['client'](key) if 'client' in config else None
-                        resp = config['generate'](client, query) if client else config['generate'](key, query)
+                        if ai == 'replicate':
+                            resp = config['generate'](key, query)
+                        else:
+                            client = config['client'](key) if 'client' in config else None
+                            resp = config['generate'](client, query) if client else config['generate'](key, query)
                         responses[ai] = resp
                     except Exception as e:
                         responses[ai] = f"Error from {ai.upper()}: {str(e)}"
@@ -58,8 +64,11 @@ def index():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        client = config['client'](key) if 'client' in config else None
-                        vote = config['generate'](client, vote_prompt) if client else config['generate'](key, vote_prompt)
+                        if ai == 'replicate':
+                            vote = config['generate'](key, vote_prompt)
+                        else:
+                            client = config['client'](key) if 'client' in config else None
+                            vote = config['generate'](client, vote_prompt) if client else config['generate'](key, vote_prompt)
                         num = int(vote.strip())
                         if 1 <= num <= len(ai_list):
                             votes[num] += 1
@@ -97,8 +106,11 @@ def idea_eval():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        client = config['client'](key) if 'client' in config else None
-                        resp = config['generate'](client, prompt) if client else config['generate'](key, prompt)
+                        if ai == 'replicate':
+                            resp = config['generate'](key, prompt)
+                        else:
+                            client = config['client'](key) if 'client' in config else None
+                            resp = config['generate'](client, prompt) if client else config['generate'](key, prompt)
                         responses[ai] = resp
                     except Exception as e:
                         responses[ai] = f"Error from {ai.upper()}: {str(e)}"
@@ -114,8 +126,11 @@ def idea_eval():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        client = config['client'](key) if 'client' in config else None
-                        vote = config['generate'](client, vote_prompt) if client else config['generate'](key, vote_prompt)
+                        if ai == 'replicate':
+                            vote = config['generate'](key, vote_prompt)
+                        else:
+                            client = config['client'](key) if 'client' in config else None
+                            vote = config['generate'](client, vote_prompt) if client else config['generate'](key, vote_prompt)
                         num = int(vote.strip())
                         if 1 <= num <= len(ai_list):
                             votes[num] += 1
@@ -148,8 +163,11 @@ def market_research():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        client = config['client'](key) if 'client' in config else None
-                        resp = config['generate'](client, prompt) if client else config['generate'](key, prompt)
+                        if ai == 'replicate':
+                            resp = config['generate'](key, prompt)
+                        else:
+                            client = config['client'](key) if 'client' in config else None
+                            resp = config['generate'](client, prompt) if client else config['generate'](key, prompt)
                         responses[ai] = resp
                     except Exception as e:
                         responses[ai] = f"Error from {ai.upper()}: {str(e)}"
@@ -165,8 +183,11 @@ def market_research():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        client = config['client'](key) if 'client' in config else None
-                        vote = config['generate'](client, vote_prompt) if client else config['generate'](key, vote_prompt)
+                        if ai == 'replicate':
+                            vote = config['generate'](key, vote_prompt)
+                        else:
+                            client = config['client'](key) if 'client' in config else None
+                            vote = config['generate'](client, vote_prompt) if client else config['generate'](key, vote_prompt)
                         num = int(vote.strip())
                         if 1 <= num <= len(ai_list):
                             votes[num] += 1
@@ -199,8 +220,11 @@ def competitive_analysis():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        client = config['client'](key) if 'client' in config else None
-                        resp = config['generate'](client, prompt) if client else config['generate'](key, prompt)
+                        if ai == 'replicate':
+                            resp = config['generate'](key, prompt)
+                        else:
+                            client = config['client'](key) if 'client' in config else None
+                            resp = config['generate'](client, prompt) if client else config['generate'](key, prompt)
                         responses[ai] = resp
                     except Exception as e:
                         responses[ai] = f"Error from {ai.upper()}: {str(e)}"
@@ -216,8 +240,11 @@ def competitive_analysis():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        client = config['client'](key) if 'client' in config else None
-                        vote = config['generate'](client, vote_prompt) if client else config['generate'](key, vote_prompt)
+                        if ai == 'replicate':
+                            vote = config['generate'](key, vote_prompt)
+                        else:
+                            client = config['client'](key) if 'client' in config else None
+                            vote = config['generate'](client, vote_prompt) if client else config['generate'](key, vote_prompt)
                         num = int(vote.strip())
                         if 1 <= num <= len(ai_list):
                             votes[num] += 1
@@ -250,8 +277,11 @@ def financial_projections():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        client = config['client'](key) if 'client' in config else None
-                        resp = config['generate'](client, prompt) if client else config['generate'](key, prompt)
+                        if ai == 'replicate':
+                            resp = config['generate'](key, prompt)
+                        else:
+                            client = config['client'](key) if 'client' in config else None
+                            resp = config['generate'](client, prompt) if client else config['generate'](key, prompt)
                         responses[ai] = resp
                     except Exception as e:
                         responses[ai] = f"Error from {ai.upper()}: {str(e)}"
@@ -267,8 +297,11 @@ def financial_projections():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        client = config['client'](key) if 'client' in config else None
-                        vote = config['generate'](client, vote_prompt) if client else config['generate'](key, vote_prompt)
+                        if ai == 'replicate':
+                            vote = config['generate'](key, vote_prompt)
+                        else:
+                            client = config['client'](key) if 'client' in config else None
+                            vote = config['generate'](client, vote_prompt) if client else config['generate'](key, vote_prompt)
                         num = int(vote.strip())
                         if 1 <= num <= len(ai_list):
                             votes[num] += 1
