@@ -86,9 +86,13 @@ def index():
 
     return render_template('index.html', result=result, ai_keys=ai_keys)
 
-@app.route('/tools', methods=['GET'])
-def tools():
-    return render_template('tools.html')
+@app.route('/business_tools', methods=['GET'])
+def business_tools():
+    return render_template('business_tools.html')
+
+@app.route('/corporate_titan_tools', methods=['GET'])
+def corporate_titan_tools():
+    return render_template('corporate_titan_tools.html')
 
 @app.route('/idea_eval', methods=['GET', 'POST'])
 def idea_eval():
@@ -317,6 +321,177 @@ def financial_projections():
                     f"{'\n\n'.join([f'**{ai.upper()}:**\n{resp}' for ai, resp in responses.items()])}"
                 )
     return render_template('financial_projections.html', result=result, ai_keys=ai_keys)
+
+@app.route('/global_expansion', methods=['GET', 'POST'])
+def global_expansion():
+    result = None
+    ai_keys = {ai: session.get(f'{ai}_key', '') for ai in AI_CONFIGS.keys()}
+    if request.method == 'POST':
+        query = request.form.get('query')
+        if query:
+            active_ais = {ai: config for ai, config in AI_CONFIGS.items() if session.get(f'{ai}_key')}
+            if len(active_ais) < 2:
+                result = "Need 2+ API keys for global expansion simulation."
+            else:
+                prompt = f"Simulate a global expansion strategy for: {query}. Propose 3 regions, market entry tactics, and estimated ROI (USD/year) by 2030. Be detailed."
+                responses = {}
+                for ai, config in active_ais.items():
+                    try:
+                        key = session[f'{ai}_key']
+                        if ai == 'llama':
+                            resp = config['generate'](key, prompt)
+                        else:
+                            client = config['client'](key)
+                            resp = config['generate'](client, prompt)
+                        responses[ai] = resp
+                    except Exception as e:
+                        responses[ai] = f"Error from {ai.upper()}: {str(e)}"
+
+                ai_list = list(responses.keys())
+                numbered_responses = "\n".join([f"{i+1}. {ai.upper()}: {responses[ai]}" for i, ai in enumerate(ai_list)])
+                vote_prompt = (
+                    f"Vote for the best global expansion strategy for: '{query}'\nStrategies:\n{numbered_responses}\n"
+                    f"Vote for the most feasible and high-ROI strategy. Reply ONLY with the number (1-{len(ai_list)})."
+                )
+
+                votes = {i+1: 0 for i in range(len(ai_list))}
+                for ai, config in active_ais.items():
+                    try:
+                        key = session[f'{ai}_key']
+                        if ai == 'llama':
+                            vote = config['generate'](key, vote_prompt)
+                        else:
+                            client = config['client'](key)
+                            vote = config['generate'](client, vote_prompt)
+                        num = int(vote.strip())
+                        if 1 <= num <= len(ai_list):
+                            votes[num] += 1
+                    except (ValueError, Exception):
+                        pass
+
+                best_num = max(votes, key=votes.get)
+                best_ai = ai_list[best_num - 1].upper()
+                best_answer = responses[best_ai.lower()]
+                result = (
+                    f"**Best Global Expansion Strategy ({votes[best_num]} votes):** {best_ai} wins!\n\n{best_answer}\n\n"
+                    f"---\n\n**All {len(ai_list)} Strategies:**\n"
+                    f"{'\n\n'.join([f'**{ai.upper()}:**\n{resp}' for ai, resp in responses.items()])}"
+                )
+    return render_template('global_expansion.html', result=result, ai_keys=ai_keys)
+
+@app.route('/ai_ethics_audit', methods=['GET', 'POST'])
+def ai_ethics_audit():
+    result = None
+    ai_keys = {ai: session.get(f'{ai}_key', '') for ai in AI_CONFIGS.keys()}
+    if request.method == 'POST':
+        query = request.form.get('query')
+        if query:
+            active_ais = {ai: config for ai, config in AI_CONFIGS.items() if session.get(f'{ai}_key')}
+            if len(active_ais) < 2:
+                result = "Need 2+ API keys for AI ethics audit."
+            else:
+                prompt = f"Audit the AI system: {query}. Identify 3 ethical risks, propose mitigation strategies, and assess compliance (1-10). Be thorough."
+                responses = {}
+                for ai, config in active_ais.items():
+                    try:
+                        key = session[f'{ai}_key']
+                        if ai == 'llama':
+                            resp = config['generate'](key, prompt)
+                        else:
+                            client = config['client'](key)
+                            resp = config['generate'](client, prompt)
+                        responses[ai] = resp
+                    except Exception as e:
+                        responses[ai] = f"Error from {ai.upper()}: {str(e)}"
+
+                ai_list = list(responses.keys())
+                numbered_responses = "\n".join([f"{i+1}. {ai.upper()}: {responses[ai]}" for i, ai in enumerate(ai_list)])
+                vote_prompt = (
+                    f"Vote for the best AI ethics audit for: '{query}'\nAudits:\n{numbered_responses}\n"
+                    f"Vote for the most comprehensive and actionable audit. Reply ONLY with the number (1-{len(ai_list)})."
+                )
+
+                votes = {i+1: 0 for i in range(len(ai_list))}
+                for ai, config in active_ais.items():
+                    try:
+                        key = session[f'{ai}_key']
+                        if ai == 'llama':
+                            vote = config['generate'](key, vote_prompt)
+                        else:
+                            client = config['client'](key)
+                            vote = config['generate'](client, vote_prompt)
+                        num = int(vote.strip())
+                        if 1 <= num <= len(ai_list):
+                            votes[num] += 1
+                    except (ValueError, Exception):
+                        pass
+
+                best_num = max(votes, key=votes.get)
+                best_ai = ai_list[best_num - 1].upper()
+                best_answer = responses[best_ai.lower()]
+                result = (
+                    f"**Best AI Ethics Audit ({votes[best_num]} votes):** {best_ai} wins!\n\n{best_answer}\n\n"
+                    f"---\n\n**All {len(ai_list)} Audits:**\n"
+                    f"{'\n\n'.join([f'**{ai.upper()}:**\n{resp}' for ai, resp in responses.items()])}"
+                )
+    return render_template('ai_ethics_audit.html', result=result, ai_keys=ai_keys)
+
+@app.route('/rd_breakthrough', methods=['GET', 'POST'])
+def rd_breakthrough():
+    result = None
+    ai_keys = {ai: session.get(f'{ai}_key', '') for ai in AI_CONFIGS.keys()}
+    if request.method == 'POST':
+        query = request.form.get('query')
+        if query:
+            active_ais = {ai: config for ai, config in AI_CONFIGS.items() if session.get(f'{ai}_key')}
+            if len(active_ais) < 2:
+                result = "Need 2+ API keys for R&D breakthrough generation."
+            else:
+                prompt = f"Generate R&D breakthrough ideas for: {query}. Propose 3 innovative projects, their potential impact, and development timeline (years). Be visionary."
+                responses = {}
+                for ai, config in active_ais.items():
+                    try:
+                        key = session[f'{ai}_key']
+                        if ai == 'llama':
+                            resp = config['generate'](key, prompt)
+                        else:
+                            client = config['client'](key)
+                            resp = config['generate'](client, prompt)
+                        responses[ai] = resp
+                    except Exception as e:
+                        responses[ai] = f"Error from {ai.upper()}: {str(e)}"
+
+                ai_list = list(responses.keys())
+                numbered_responses = "\n".join([f"{i+1}. {ai.upper()}: {responses[ai]}" for i, ai in enumerate(ai_list)])
+                vote_prompt = (
+                    f"Vote for the best R&D breakthrough idea for: '{query}'\nIdeas:\n{numbered_responses}\n"
+                    f"Vote for the most innovative and impactful idea. Reply ONLY with the number (1-{len(ai_list)})."
+                )
+
+                votes = {i+1: 0 for i in range(len(ai_list))}
+                for ai, config in active_ais.items():
+                    try:
+                        key = session[f'{ai}_key']
+                        if ai == 'llama':
+                            vote = config['generate'](key, vote_prompt)
+                        else:
+                            client = config['client'](key)
+                            vote = config['generate'](client, vote_prompt)
+                        num = int(vote.strip())
+                        if 1 <= num <= len(ai_list):
+                            votes[num] += 1
+                    except (ValueError, Exception):
+                        pass
+
+                best_num = max(votes, key=votes.get)
+                best_ai = ai_list[best_num - 1].upper()
+                best_answer = responses[best_ai.lower()]
+                result = (
+                    f"**Best R&D Breakthrough ({votes[best_num]} votes):** {best_ai} wins!\n\n{best_answer}\n\n"
+                    f"---\n\n**All {len(ai_list)} Ideas:**\n"
+                    f"{'\n\n'.join([f'**{ai.upper()}:**\n{resp}' for ai, resp in responses.items()])}"
+                )
+    return render_template('rd_breakthrough.html', result=result, ai_keys=ai_keys)
 
 if __name__ == '__main__':
     app.run(debug=True)
