@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html>
-<head><title>BoardChat Business Idea Evaluator</title></head>
+<head><title>Idea Evaluator</title></head>
 <body>
-    <h1>BoardChat Business Idea Evaluator</h1>
+    <h1>Business Idea Evaluator</h1>
     <form method="post">
         <label>OpenAI Key: <input type="text" name="openai_key" value="{{ ai_keys.get('openai', '') }}"> <span class="note">(platform.openai.com)</span></label><br>
         <label>Gemini Key: <input type="text" name="gemini_key" value="{{ ai_keys.get('gemini', '') }}"> <span class="note">(aistudio.google.com)</span></label><br>
         <label>Llama Key: <input type="text" name="llama_key" value="{{ ai_keys.get('llama', '') }}"> <span class="note">(openrouter.ai)</span></label><br>
-        <label>Business Idea: <input type="text" name="query" size="50"></label><br>
-        <input type="submit" value="Evaluate Idea">
+        <label>Idea: <input type="text" name="query" size="50"></label><br>
+        <input type="submit" value="Evaluate">
     </form>
     {% if result %}
         <pre>{{ result }}</pre>
     {% endif %}
-    <a href="/tools">Back to Tools</a> | <a href="/">Back to Boardroom</a>
+    <a href="/business_tools">Back to Business Tools</a>
 </body>
 </html>
