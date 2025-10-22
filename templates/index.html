@@ -1,26 +1,24 @@
 <!DOCTYPE html>
 <html>
-<head><title>BoardChat Home</title></head>
+<head><title>BoardChat</title></head>
 <body>
-    <h1>Welcome to BoardChat</h1>
-    <p>Choose your section to empower your business:</p>
-    <h2>BoardChat Business Tools</h2>
-    <ul>
-        <li><a href="/business_tools">Business Tools Overview</a></li>
-    </ul>
-    <h2>Corporate Titan Tools</h2>
-    <ul>
-        <li><a href="/corporate_titan_tools">Corporate Titan Tools Overview</a></li>
-    </ul>
-    <form method="post">
-        <label>OpenAI Key: <input type="text" name="openai_key" value="{{ ai_keys.get('openai', '') }}"> <span class="note">(platform.openai.com)</span></label><br>
-        <label>Gemini Key: <input type="text" name="gemini_key" value="{{ ai_keys.get('gemini', '') }}"> <span class="note">(aistudio.google.com)</span></label><br>
-        <label>Llama Key: <input type="text" name="llama_key" value="{{ ai_keys.get('llama', '') }}"> <span class="note">(openrouter.ai)</span></label><br>
-        <label>Query: <input type="text" name="query" size="50"></label><br>
-        <input type="submit" value="Convene Boardroom">
-    </form>
-    {% if result %}
-        <pre>{{ result }}</pre>
-    {% endif %}
+  {% if email %}
+    <p>Welcome, {{ email }} | <a href="/logout">Logout</a></p>
+  {% else %}
+    <p><a href="/login">Login with Google</a></p>
+  {% endif %}
+  <h1>Boardroom Chat</h1>
+  <form method="post">
+    <input type="text" name="query" placeholder="Enter query"><br>
+    <input type="text" name="openai_key" placeholder="OpenAI Key"><br>
+    <input type="text" name="gemini_key" placeholder="Gemini Key"><br>
+    <input type="text" name="llama_key" placeholder="LLaMA Key"><br>
+    <button type="submit">Submit</button>
+  </form>
+  {% if result %}
+    <pre>{{ result }}</pre>
+  {% endif %}
+  <h2><a href="/business_tools">BoardChat Business Tools</a></h2>
+  <h2><a href="/corporate_titan_tools">Corporate Titan Tools</a></h2>
 </body>
 </html>
