@@ -255,13 +255,13 @@ def competitive_analysis():
                 best_ai = ai_list[best_num - 1].upper()
                 best_answer = responses[best_ai.lower()]
                 result = (
-                    f"**Best Corporate Analysis ({votes[best_num]} votes):** {best_ai} wins!\n\n{best_answer}\n\n"
+                    f"**Best Competitive Analysis ({votes[best_num]} votes):** {best_ai} wins!\n\n{best_answer}\n\n"
                     f"---\n\n**All {len(ai_list)} Analyses:**\n"
                     f"{'\n\n'.join([f'**{ai.upper()}:**\n{resp}' for ai, resp in responses.items()])}"
                 )
-    return render_template('corporate_analysis.html', result=result, ai_keys=ai_keys)
+    return render_template('competitive_analysis.html', result=result, ai_keys=ai_keys)
 
-@app.route('/corporate_projections', methods=['GET', 'POST'])
+@app.route('/financial_projections', methods=['GET', 'POST'])
 def financial_projections():
     result = None
     ai_keys = {ai: session.get(f'{ai}_key', '') for ai in AI_CONFIGS.keys()}
