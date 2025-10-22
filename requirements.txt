@@ -1,8 +1,5 @@
 flask==3.0.3
-openai==1.02.2
+openai==1.55.3
 google-generativeai==0.7.2
 requests==2.32.3
 gunicorn==23.0.0
-flask-login==0.6.3
-google-auth-oauthlib==1.2.0
-requests-oauthlib==2.0.0
