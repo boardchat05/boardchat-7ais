@@ -24,6 +24,30 @@ AI_CONFIGS = {
             'model': AI_CONFIGS['llama']['model'],
             'messages': [{'role': 'user', 'content': prompt}]
         }).json()['choices'][0]['message']['content']
+    },
+    'claude': {
+        'model': 'anthropic/claude-sonnet-4.5',
+        'endpoint': 'https://openrouter.ai/api/v1/chat/completions',
+        'generate': lambda key, prompt: requests.post(AI_CONFIGS['claude']['endpoint'], headers={'Authorization': f'Bearer {key}'}, json={
+            'model': AI_CONFIGS['claude']['model'],
+            'messages': [{'role': 'user', 'content': prompt}]
+        }).json()['choices'][0]['message']['content']
+    },
+    'deepseek': {
+        'model': 'deepseek/deepseek-chat-v3-0324',
+        'endpoint': 'https://openrouter.ai/api/v1/chat/completions',
+        'generate': lambda key, prompt: requests.post(AI_CONFIGS['deepseek']['endpoint'], headers={'Authorization': f'Bearer {key}'}, json={
+            'model': AI_CONFIGS['deepseek']['model'],
+            'messages': [{'role': 'user', 'content': prompt}]
+        }).json()['choices'][0]['message']['content']
+    },
+    'grok': {
+        'model': 'x-ai/grok-4-fast',
+        'endpoint': 'https://openrouter.ai/api/v1/chat/completions',
+        'generate': lambda key, prompt: requests.post(AI_CONFIGS['grok']['endpoint'], headers={'Authorization': f'Bearer {key}'}, json={
+            'model': AI_CONFIGS['grok']['model'],
+            'messages': [{'role': 'user', 'content': prompt}]
+        }).json()['choices'][0]['message']['content']
     }
 }
 
@@ -44,7 +68,7 @@ def index():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        if ai == 'llama':
+                        if 'endpoint' in config:
                             resp = config['generate'](key, query)
                         else:
                             client = config['client'](key)
@@ -64,7 +88,7 @@ def index():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        if ai == 'llama':
+                        if 'endpoint' in config:
                             vote = config['generate'](key, vote_prompt)
                         else:
                             client = config['client'](key)
@@ -106,7 +130,7 @@ def idea_eval():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        if ai == 'llama':
+                        if 'endpoint' in config:
                             resp = config['generate'](key, prompt)
                         else:
                             client = config['client'](key)
@@ -126,7 +150,7 @@ def idea_eval():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        if ai == 'llama':
+                        if 'endpoint' in config:
                             vote = config['generate'](key, vote_prompt)
                         else:
                             client = config['client'](key)
@@ -163,7 +187,7 @@ def market_research():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        if ai == 'llama':
+                        if 'endpoint' in config:
                             resp = config['generate'](key, prompt)
                         else:
                             client = config['client'](key)
@@ -183,7 +207,7 @@ def market_research():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        if ai == 'llama':
+                        if 'endpoint' in config:
                             vote = config['generate'](key, vote_prompt)
                         else:
                             client = config['client'](key)
@@ -220,7 +244,7 @@ def competitive_analysis():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        if ai == 'llama':
+                        if 'endpoint' in config:
                             resp = config['generate'](key, prompt)
                         else:
                             client = config['client'](key)
@@ -240,7 +264,7 @@ def competitive_analysis():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        if ai == 'llama':
+                        if 'endpoint' in config:
                             vote = config['generate'](key, vote_prompt)
                         else:
                             client = config['client'](key)
@@ -277,7 +301,7 @@ def financial_projections():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        if ai == 'llama':
+                        if 'endpoint' in config:
                             resp = config['generate'](key, prompt)
                         else:
                             client = config['client'](key)
@@ -297,7 +321,7 @@ def financial_projections():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        if ai == 'llama':
+                        if 'endpoint' in config:
                             vote = config['generate'](key, vote_prompt)
                         else:
                             client = config['client'](key)
@@ -342,7 +366,7 @@ def global_expansion():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        if ai == 'llama':
+                        if 'endpoint' in config:
                             resp = config['generate'](key, prompt)
                         else:
                             client = config['client'](key)
@@ -362,7 +386,7 @@ def global_expansion():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        if ai == 'llama':
+                        if 'endpoint' in config:
                             vote = config['generate'](key, vote_prompt)
                         else:
                             client = config['client'](key)
@@ -399,7 +423,7 @@ def ai_ethics_audit():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        if ai == 'llama':
+                        if 'endpoint' in config:
                             resp = config['generate'](key, prompt)
                         else:
                             client = config['client'](key)
@@ -419,7 +443,7 @@ def ai_ethics_audit():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        if ai == 'llama':
+                        if 'endpoint' in config:
                             vote = config['generate'](key, vote_prompt)
                         else:
                             client = config['client'](key)
@@ -456,7 +480,7 @@ def rd_breakthrough():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        if ai == 'llama':
+                        if 'endpoint' in config:
                             resp = config['generate'](key, prompt)
                         else:
                             client = config['client'](key)
@@ -476,7 +500,7 @@ def rd_breakthrough():
                 for ai, config in active_ais.items():
                     try:
                         key = session[f'{ai}_key']
-                        if ai == 'llama':
+                        if 'endpoint' in config:
                             vote = config['generate'](key, vote_prompt)
                         else:
                             client = config['client'](key)
