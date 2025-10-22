@@ -46,7 +46,7 @@ AI_CONFIGS = {
         'endpoint': 'https://openrouter.ai/api/v1/chat/completions',
         'generate': lambda key, prompt: requests.post(AI_CONFIGS['llama']['endpoint'], headers={'Authorization': f'Bearer {key}'}, json={
             'model': AI_CONFIGS['llama']['model'],
-            'messages': [{'role': 'user', 'content': prompt}]
+            'messages': [{'role': "user", "content": prompt}]
         }).json()['choices'][0]['message']['content']
     }
 }
@@ -175,10 +175,17 @@ def index():
 
     return render_template('index.html', result=result, ai_keys=ai_keys, email=current_user.id)
 
-@app.route('/tools', methods=['GET'])
+@app.route('/business_tools', methods=['GET'])
 @login_required
-def tools():
-    return render_template('tools.html')
+def business_tools():
+    print("Accessing business_tools")  # Debug
+    return render_template('business_tools.html')
+
+@app.route('/corporate_titan_tools', methods=['GET'])
+@login_required
+def corporate_titan_tools():
+    print("Accessing corporate_titan_tools")  # Debug
+    return render_template('corporate_titan_tools.html')
 
 @app.route('/idea_eval', methods=['GET', 'POST'])
 @login_required
@@ -238,8 +245,7 @@ def idea_eval():
                 )
     return render_template('idea_eval.html', result=result, ai_keys=ai_keys)
 
-# [Rest of the routes (market_research, competitive_analysis, etc.) remain the same as before - omitted for brevity but included in the full file]
-# Copy the remaining routes from the previous version if needed
+# [Add other routes like market_research, etc., from previous versions if needed - omitted for brevity but can be included]
 
 if __name__ == '__main__':
     app.run(debug=True)
