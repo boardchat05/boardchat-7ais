@@ -1,15 +1,11 @@
-<!DOCTYPE html>
-<html>
-<head><title>Tools</title></head>
-body {
-  <h1>BoardChat Tools</h1>
-  <p>Select a tool:</p>
-  <ul>
-    <li><a href="/idea_eval">Business Idea Evaluator</a></li>
-    <li><a href="/market_research">Market Research Summarizer</a></li>
-    <li><a href="/competitive_analysis">Competitive Analysis Tool</a></li>
-    <li><a href="/financial_projections">Financial Projections Tool</a></li>
-  </ul>
-  <a href="/">Back to Boardroom</a>
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}Tools{% endblock %}
+{% block content %}
+<h1>Business Tools</h1>
+<div class="tools-grid">
+  <div class="tool-card"><a href="/idea_eval">Idea Evaluator</a></div>
+  <div class="tool-card"><a href="/market_research">Market Research</a></div>
+  <div class="tool-card"><a href="/competitive_analysis">Competitive Analysis</a></div>
+  <div class="tool-card"><a href="/financial_projections">Financial Projections</a></div>
+</div>
+{% endblock %}
