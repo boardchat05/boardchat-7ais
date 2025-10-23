@@ -1,19 +1,46 @@
 <!DOCTYPE html>
-<html>
-<head><title>BoardChat</title></head>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BoardChat - AI Boardroom</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; background: #f4f7f9; color: #333; }
+    h1 { color: #1a73e8; }
+    input, button { padding: 10px; margin: 5px 0; width: 100%; border: 1px solid #ccc; border-radius: 4px; }
+    button { background: #1a73e8; color: white; font-weight: bold; cursor: pointer; }
+    .note { font-size: 0.8em; color: #666; }
+    pre { background: #eee; padding: 15px; border-radius: 6px; white-space: pre-wrap; }
+    a { color: #1a73e8; text-decoration: none; font-weight: bold; }
+    .tools { margin-top: 30px; }
+  </style>
+</head>
 <body>
-    <h1>BoardChat Boardroom</h1>
-    <form method="post">
-        <label>OpenAI Key: <input type="text" name="openai_key" value="{{ ai_keys.get('openai', '') }}"> <span class="note">(platform.openai.com)</span></label><br>
-        <label>Gemini Key: <input type="text" name="gemini_key" value="{{ ai_keys.get('gemini', '') }}"> <span class="note">(aistudio.google.com)</span></label><br>
-        <label>Llama Key: <input type="text" name="llama_key" value="{{ ai_keys.get('llama', '') }}"> <span class="note">(openrouter.ai)</span></label><br>
-        <label>OpenRouter Key: <input type="text" name="openrouter_key" value="{{ ai_keys.get('openrouter', '') }}"> <span class="note">(openrouter.ai - for Claude, DeepSeek, Grok)</span></label><br>
-        <label>Query: <input type="text" name="query" size="50"></label><br>
-        <input type="submit" value="Convene Boardroom">
-    </form>
-    {% if result %}
-        <pre>{{ result }}</pre>
-    {% endif %}
-    <a href="/tools">Go to Tools</a>
+  <h1>BoardChat - AI Boardroom</h1>
+  <p>6 AIs vote on your ideas. Enter keys and query below.</p>
+
+  <form method="post">
+    <label>OpenAI Key: <input type="password" name="openai_key" value="{{ ai_keys.openai }}" placeholder="sk-proj-..."></label>
+    <span class="note">platform.openai.com</span><br>
+
+    <label>Gemini Key: <input type="password" name="gemini_key" value="{{ ai_keys.gemini }}" placeholder="AIzaSy..."></label>
+    <span class="note">aistudio.google.com</span><br>
+
+    <label>OpenRouter Key (Llama, Claude, DeepSeek, Grok): <input type="password" name="llama_key" value="{{ ai_keys.llama }}" placeholder="sk-or-v1-..."></label>
+    <span class="note">openrouter.ai (one key for 4 models)</span><br>
+
+    <label>Query: <input type="text" name="query" placeholder="e.g., Best startup idea for 2026?" required></label><br>
+
+    <button type="submit">Convene Boardroom</button>
+  </form>
+
+  {% if result %}
+    <pre>{{ result }}</pre>
+  {% endif %}
+
+  <div class="tools">
+    <h2>Tools</h2>
+    <p><a href="/business_tools">BoardChat Business Tools</a></p>
+    <p><a href="/corporate_titan_tools">Corporate Titan Tools</a></p>
+  </div>
 </body>
 </html>
