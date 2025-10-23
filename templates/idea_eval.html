@@ -1,14 +1,18 @@
 <!DOCTYPE html>
-<html><head><title>Idea Evaluator</title><style>body{font-family:Arial;margin:40px;background:#f4f7f9}input,button{padding:10px;margin:5px 0;width:100%}button{background:#1a73e8;color:white;font-weight:bold}pre{background:#eee;padding:15px;border-radius:6px;white-space:pre-wrap}a{color:#1a73e8;font-weight:bold}</style></head>
+<html>
+<head><title>Idea Evaluator</title></head>
 <body>
-  <h1>Business Idea Evaluator</h1>
-  <form method="post">
-    <label>OpenAI Key: <input type="password" name="openai_key" value="{{ ai_keys.openai }}"></label><br>
-    <label>Gemini Key: <input type="password" name="gemini_key" value="{{ ai_keys.gemini }}"></label><br>
-    <label>OpenRouter Key: <input type="password" name="llama_key" value="{{ ai_keys.llama }}"></label><br>
-    <label>Idea: <input type="text" name="query" placeholder="e.g., AI-powered coffee shop" required></label><br>
-    <button>Evaluate Idea</button>
-  </form>
-  {% if result %}<pre>{{ result }}</pre>{% endif %}
-  <p><a href="/business_tools">Back</a></p>
-</body></html>
+    <h1>Business Idea Evaluator</h1>
+    <form method="post">
+        <label>OpenAI Key: <input type="text" name="openai_key" value="{{ ai_keys.get('openai', '') }}"></label><br>
+        <label>Gemini Key: <input type="text" name="gemini_key" value="{{ ai_keys.get('gemini', '') }}"></label><br>
+        <label>Llama Key: <input type="text" name="llama_key" value="{{ ai_keys.get('llama', '') }}"></label><br>
+        <label>Idea: <input type="text" name="query" size="50"></label><br>
+        <input type="submit" value="Evaluate Idea">
+    </form>
+    {% if result %}
+        <pre>{{ result }}</pre>
+    {% endif %}
+    <a href="/tools">Back to Tools</a>
+</body>
+</html>
