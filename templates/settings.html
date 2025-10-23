@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+<h1>API Settings</h1>
+<form method="post">
+  <input type="password" name="openai_key" placeholder="OpenAI" value="{{ ai_keys.openai }}">
+  <input type="password" name="gemini_key" placeholder="Gemini" value="{{ ai_keys.gemini }}">
+  <input type="password" name="llama_key" placeholder="OpenRouter (Llama/Claude/DeepSeek/Grok)" value="{{ ai_keys.llama }}">
+  <button>Save Keys</button>
+</form>
+{% endblock %}
