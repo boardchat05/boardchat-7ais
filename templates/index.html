@@ -7,12 +7,30 @@
 <form method="post">
   <input type="password" name="openai_key" placeholder="OpenAI Key" value="{{ ai_keys.openai }}">
   <input type="password" name="gemini_key" placeholder="Gemini Key" value="{{ ai_keys.gemini }}">
-  <input type="password" name="llama_key" placeholder="OpenRouter Key (All 4)" value="{{ ai_keys.llama }}">
-  <input type="text" name="query" placeholder="e.g., Best startup idea?" required>
+  <input type="password" name="llama_key" placeholder="OpenRouter Key" value="{{ ai_keys.llama }}">
+  <input type="text" name="query" placeholder="Best startup idea?" required>
   <button>Convene Boardroom</button>
 </form>
 
 {% if result %}
-<pre>{{ result }}</pre>
+  {% set responses = result.split('---')[1]|default('') %}
+  {% if 'All Answers' in result %}
+    {% set answers = result.split('**All Answers:**')[1].split('**') %}
+    {% for part in answers %}
+      {% if ':' in part and part.strip() %}
+        {% set ai_name = part.split(':')[0].strip().upper() %}
+        {% set ai_text = part.split(':', 1)[1] %}
+        <div class="ai-response">
+          <img src="/static/ai/{{ ai_name|lower }}.png" class="ai-logo" alt="{{ ai_name }}">
+          <div>
+            <strong>{{ ai_name }}:</strong><br>
+            {{ ai_text|safe }}
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  {% else %}
+    <pre>{{ result }}</pre>
+  {% endif %}
 {% endif %}
 {% endblock %}
