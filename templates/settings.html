@@ -4,11 +4,28 @@
 <h1>App Settings</h1>
 
 <form method="post">
+  <h3>Background Theme</h3>
+  <select name="background">
+    <option value="forest" {% if background == 'forest' %}selected{% endif %}>Forest (Green)</option>
+    <option value="city" {% if background == 'city' %}selected{% endif %}>City (Blue)</option>
+    <option value="space" {% if background == 'space' %}selected{% endif %}>Space (Purple)</option>
+    <option value="ocean" {% if background == 'ocean' %}selected{% endif %}>Ocean (Blue)</option>
+    <option value="mountain" {% if background == 'mountain' %}selected{% endif %}>Mountain (Brown)</option>
+    <option value="desert" {% if background == 'desert' %}selected{% endif %}>Desert (Orange)</option>
+    <option value="forest-night" {% if background == 'forest-night' %}selected{% endif %}>Forest Night (Gray)</option>
+    <option value="arctic" {% if background == 'arctic' %}selected{% endif %}>Arctic (Blue)</option>
+  </select>
+
   <h3>Theme</h3>
   <select name="theme">
-    <option value="blue" {% if theme == 'blue' %}selected{% endif %}>Blue (Default)</option>
-    <option value="green" {% if theme == 'green' %}selected{% endif %}>Green</option>
-    <option value="purple" {% if theme == 'purple' %}selected{% endif %}>Purple</option>
+    <option value="forest" {% if theme == 'forest' %}selected{% endif %}>Forest (Green)</option>
+    <option value="city" {% if theme == 'city' %}selected{% endif %}>City (Blue)</option>
+    <option value="space" {% if theme == 'space' %}selected{% endif %}>Space (Purple)</option>
+    <option value="ocean" {% if theme == 'ocean' %}selected{% endif %}>Ocean (Blue)</option>
+    <option value="mountain" {% if theme == 'mountain' %}selected{% endif %}>Mountain (Brown)</option>
+    <option value="desert" {% if theme == 'desert' %}selected{% endif %}>Desert (Orange)</option>
+    <option value="forest-night" {% if theme == 'forest-night' %}selected{% endif %}>Forest Night (Gray)</option>
+    <option value="arctic" {% if theme == 'arctic' %}selected{% endif %}>Arctic (Blue)</option>
   </select>
 
   <h3>Dark/Light Mode</h3>
