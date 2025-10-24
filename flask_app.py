@@ -3,6 +3,7 @@ from openai import OpenAI
 import google.generativeai as genai
 import requests
 import os
+import random
 
 app = Flask(__name__)
 app.secret_key = 'boardchat2025rulez'
@@ -41,7 +42,7 @@ def run_boardroom(query, prompt="{query}"):
     best = max(votes, key=votes.get)
     winner = list(responses.keys())[best-1].upper()
     result = f"**{winner} WINS ({votes[best]} votes)!**\n\n{responses[winner.lower()]}\n\n---\n\n**All Answers:**\n" + "\n\n".join([f"**{a.upper()}:**\n{r}" for a,r in responses.items()])
-    session['last_chat'] = result  # SAVE CHAT
+    session['last_chat'] = result
     return result
 
 @app.route('/', methods=['GET','POST'])
@@ -93,20 +94,16 @@ def financial_projections():
 @app.route('/settings', methods=['GET','POST'])
 def settings():
     if request.method == 'POST':
-        # Save theme, mode, review, and background
         session['theme'] = request.form.get('theme', 'forest')
         session['dark_mode'] = 'on' if 'dark_mode' in request.form else 'off'
         session['review'] = request.form.get('review', '')
         session['share_link'] = 'https://boardchat-7ais.onrender.com'
         session['background'] = request.form.get('background', 'forest')
         return redirect(url_for('index'))
-    
-    # Load current settings
     current_theme = session.get('theme', 'forest')
     current_mode = session.get('dark_mode', 'off')
     current_review = session.get('review', '')
     current_background = session.get('background', 'forest')
-    
     return render_template('settings.html', theme=current_theme, dark_mode=current_mode, review=current_review, background=current_background)
 
 @app.route('/saved_chats')
@@ -123,7 +120,10 @@ def logout():
 def tools():
     return render_template('tools.html', theme=session.get('theme', 'forest'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
 
-# Serve static files explicitly (fallback for Render)
+@app.route('/dashboard')
+def dashboard():
+    return render_template('dashboard.html', chats=random.randint(10, 20), votes=random.randint(40, 60), users=random.randint(5, 15), theme=session.get('theme', 'forest'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
+
 @app.route('/static/<path:path>')
 def send_static(path):
     return app.send_static_file(path)
