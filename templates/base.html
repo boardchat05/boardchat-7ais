@@ -5,31 +5,51 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}BoardChat{% endblock %}</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <script>
+    // Dark/Light Mode Toggle
+    function toggleDarkMode() {
+      const body = document.body;
+      if (body.classList.contains('dark')) {
+        body.classList.remove('dark');
+        localStorage.setItem('dark_mode', 'off');
+      } else {
+        body.classList.add('dark');
+        localStorage.setItem('dark_mode', 'on');
+      }
+    }
+    // Load saved mode
+    if (localStorage.getItem('dark_mode') === 'on') document.body.classList.add('dark');
+  </script>
   <style>
     :root {
-      --blue: #1a73e8;
       --glass: rgba(255, 255, 255, 0.1);
       --glass-border: rgba(255, 255, 255, 0.2);
-      --text: #e0f2fe;
       --shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
     }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Inter', sans-serif;
-      background: url('/static/background.jpg') no-repeat center center fixed;
-      background-size: cover;
-      color: var(--text);
+      margin: 0;
       min-height: 100vh;
       overflow-x: hidden;
+      transition: background-image 0.5s ease;
     }
-    .container { display: flex; min-height: 100vh; }
+    body.dark { --glass: rgba(0, 0, 0, 0.8); }
 
-    /* === SIDEBAR === */
+    /* Backgrounds and Themes */
+    body.background-forest { background: url('/static/backgrounds/forest.jpg') no-repeat center center fixed; background-size: cover; --text: #e0f2fe; --primary: #2e7d32; }
+    body.background-city { background: url('/static/backgrounds/city.jpg') no-repeat center center fixed; background-size: cover; --text: #f5f5f5; --primary: #0288d1; }
+    body.background-space { background: url('/static/backgrounds/space.jpg') no-repeat center center fixed; background-size: cover; --text: #b0bec5; --primary: #7b1fa2; }
+    body.background-ocean { background: url('/static/backgrounds/ocean.jpg') no-repeat center center fixed; background-size: cover; --text: #e0f7fa; --primary: #0288d1; }
+    body.background-mountain { background: url('/static/backgrounds/mountain.jpg') no-repeat center center fixed; background-size: cover; --text: #eceff1; --primary: #6d4c41; }
+    body.background-desert { background: url('/static/backgrounds/desert.jpg') no-repeat center center fixed; background-size: cover; --text: #efebe9; --primary: #f57c00; }
+    body.background-forest-night { background: url('/static/backgrounds/forest-night.jpg') no-repeat center center fixed; background-size: cover; --text: #cfd8dc; --primary: #455a64; }
+    body.background-arctic { background: url('/static/backgrounds/arctic.jpg') no-repeat center center fixed; background-size: cover; --text: #eceff1; --primary: #0288d1; }
+
+    .container { display: flex; min-height: 100vh; }
     .sidebar {
       width: 280px;
-      background: rgba(15, 25, 40, 0.6);
+      background: var(--glass);
       backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
       border-right: 1px solid var(--glass-border);
       padding: 40px 20px;
       box-shadow: var(--shadow);
@@ -37,17 +57,14 @@
       top: 0;
       height: 100vh;
     }
-    .logo {
-      text-align: center;
-      margin-bottom: 40px;
-    }
-    .logo img { width: 60px; filter: drop-shadow(0 0 10px var(--blue)); }
+    .logo { text-align: center; margin-bottom: 40px; }
+    .logo img { width: 60px; filter: drop-shadow(0 0 10px var(--primary)); }
     .sidebar h2 {
-      color: white;
+      color: var(--text);
       font-size: 1.6em;
       text-align: center;
       margin-bottom: 30px;
-      text-shadow: 0 0 15px var(--blue);
+      text-shadow: 0 0 15px var(--primary);
     }
     .sidebar ul { list-style: none; }
     .sidebar li { margin: 12px 0; }
@@ -63,17 +80,14 @@
       border: 1px solid var(--glass-border);
     }
     .sidebar a:hover {
-      background: rgba(26, 115, 232, 0.3);
+      background: rgba(var(--primary), 0.3);
       transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(26, 115, 232, 0.4);
+      box-shadow: 0 5px 15px rgba(var(--primary), 0.4);
     }
-
-    /* === MAIN CONTENT === */
     .main { flex: 1; padding: 40px; }
     .card {
       background: var(--glass);
       backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
       border-radius: 20px;
       padding: 35px;
       max-width: 900px;
@@ -85,14 +99,12 @@
       font-size: 2.8em;
       text-align: center;
       margin-bottom: 15px;
-      background: linear-gradient(90deg, #1a73e8, #34c759);
+      background: linear-gradient(90deg, var(--primary), #fff);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 20px rgba(26, 115, 232, 0.5);
+      text-shadow: 0 0 20px rgba(var(--primary), 0.5);
     }
-    .note { text-align: center; font-size: 0.95em; color: #bbdfff; margin-bottom: 25px; }
-
-    /* === FORMS === */
+    .note { text-align: center; font-size: 0.95em; color: var(--text); margin-bottom: 25px; }
     input, button {
       width: 100%;
       padding: 16px;
@@ -101,21 +113,19 @@
       border-radius: 14px;
       font-size: 16px;
       background: rgba(255,255,255,0.1);
-      color: white;
+      color: var(--text);
       transition: 0.3s;
     }
-    input::placeholder { color: #88c0ff; }
-    input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 15px rgba(26,115,232,0.5); }
+    input::placeholder { color: rgba(var(--text), 0.5); }
+    input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 15px rgba(var(--primary), 0.5); }
     button {
-      background: linear-gradient(45deg, #1a73e8, #34c759);
+      background: linear-gradient(45deg, var(--primary), #fff);
       font-weight: bold;
       cursor: pointer;
       border: none;
       margin-top: 15px;
     }
-    button:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(26,115,232,0.4); }
-
-    /* === RESULTS === */
+    button:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(var(--primary), 0.4); }
     pre {
       background: rgba(0,0,0,0.3);
       padding: 20px;
@@ -125,6 +135,7 @@
       border: 1px solid var(--glass-border);
       margin-top: 20px;
       line-height: 1.6;
+      color: var(--text);
     }
     .ai-response {
       display: flex;
@@ -133,7 +144,7 @@
       padding: 15px;
       background: rgba(255,255,255,0.05);
       border-radius: 14px;
-      border-left: 4px solid var(--blue);
+      border-left: 4px solid var(--primary);
     }
     .ai-logo {
       width: 32px;
@@ -141,10 +152,8 @@
       margin-right: 12px;
       border-radius: 8px;
       object-fit: contain;
-      filter: drop-shadow(0 0 5px var(--blue));
+      filter: drop-shadow(0 0 5px var(--primary));
     }
-
-    /* === TOOLS GRID === */
     .tools-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -160,10 +169,10 @@
       transition: 0.3s;
     }
     .tool-card:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
-    .tool-card a { color: white; font-weight: bold; text-decoration: none; font-size: 1.1em; }
+    .tool-card a { color: var(--text); font-weight: bold; text-decoration: none; font-size: 1.1em; }
   </style>
 </head>
-<body>
+<body class="{{ background or 'forest' }} {{ 'dark' if dark_mode == 'on' else '' }}">
   <div class="container">
     <div class="sidebar">
       <div class="logo">
