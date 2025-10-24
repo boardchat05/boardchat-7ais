@@ -1,11 +1,35 @@
 {% extends "base.html" %}
 {% block title %}Settings{% endblock %}
 {% block content %}
-<h1>API Settings</h1>
+<h1>App Settings</h1>
+
 <form method="post">
-  <input type="password" name="openai_key" placeholder="OpenAI" value="{{ ai_keys.openai }}">
-  <input type="password" name="gemini_key" placeholder="Gemini" value="{{ ai_keys.gemini }}">
-  <input type="password" name="llama_key" placeholder="OpenRouter (Llama/Claude/DeepSeek/Grok)" value="{{ ai_keys.llama }}">
-  <button>Save Keys</button>
+  <h3>Theme</h3>
+  <select name="theme">
+    <option value="blue" {% if theme == 'blue' %}selected{% endif %}>Blue (Default)</option>
+    <option value="green" {% if theme == 'green' %}selected{% endif %}>Green</option>
+    <option value="purple" {% if theme == 'purple' %}selected{% endif %}>Purple</option>
+  </select>
+
+  <h3>Dark/Light Mode</h3>
+  <label>
+    <input type="checkbox" name="dark_mode" {% if dark_mode == 'on' %}checked{% endif %}> Dark Mode
+  </label>
+  <button type="button" onclick="toggleDarkMode()">Toggle Now</button>
+
+  <h3>Share App Link</h3>
+  <input type="text" name="share_link" value="https://boardchat-7ais.onrender.com" readonly>
+  <button type="button" onclick="copyLink()">Copy Link</button>
+
+  <h3>Review Us</h3>
+  <textarea name="review" rows="3" placeholder="What do you love about BoardChat?">{{ review }}</textarea>
+  <button type="submit">Save Settings</button>
 </form>
+
+<script>
+function copyLink() {
+  navigator.clipboard.writeText('https://boardchat-7ais.onrender.com');
+  alert('Link copied!');
+}
+</script>
 {% endblock %}
