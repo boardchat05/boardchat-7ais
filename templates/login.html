@@ -2,119 +2,94 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Login - BoardChat</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - BoardChat Enterprise</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --glass: rgba(255, 255, 255, 0.2);
-      --glass-border: linear-gradient(to bottom, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.1));
-      --text: #ffffff;
-      --shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-      --primary: #00bcd4;
-      --glow: 0 0 15px rgba(0, 188, 212, 0.8);
+      --glass: rgba(255, 255, 255, 0.15);
+      --glass-border: rgba(255, 255, 255, 0.3);
+      --text-color: #1a1a1a;
+      --bg-color: #f4f7fa;
+      --primary: #007bff;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     }
     body {
-      font-family: 'Open Sans', sans-serif;
-      background: url('/static/backgrounds/{{ background or 'forest' }}.jpg') no-repeat center center fixed;
-      background-size: cover;
-      color: var(--text);
+      font-family: 'Lato', sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
       min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      overflow-x: hidden;
       margin: 0;
     }
-    .login-card {
+    .auth-card {
       background: var(--glass);
-      backdrop-filter: blur(25px);
-      border-radius: 20px;
-      padding: 40px;
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 30px;
       max-width: 400px;
       width: 100%;
       border: 1px solid var(--glass-border);
       box-shadow: var(--shadow);
       text-align: center;
     }
-    .login-card h1 {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 2.5em;
+    .auth-card h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 2em;
+      color: var(--primary);
       margin-bottom: 20px;
-      background: linear-gradient(90deg, var(--primary), #fff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 25px rgba(var(--primary), 0.6);
-      font-weight: 900;
+      font-weight: 700;
     }
-    .login-card input {
+    .auth-card input {
       width: 100%;
-      padding: 15px;
-      margin: 10px 0;
+      padding: 12px;
+      margin: 8px 0;
       border: 1px solid var(--glass-border);
-      border-radius: 15px;
-      font-family: 'Open Sans', sans-serif;
+      border-radius: 8px;
       font-size: 1em;
-      background: rgba(255, 255, 255, 0.15);
-      color: var(--text);
-      box-shadow: inset 0 1px 1px rgba(255,255,255,0.2);
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-color);
     }
-    .login-card input::placeholder { color: rgba(var(--text), 0.6); }
-    .login-card input:focus {
+    .auth-card input:focus {
       outline: none;
       border-color: var(--primary);
-      box-shadow: 0 0 20px rgba(var(--primary), 0.6), inset 0 1px 1px rgba(255,255,255,0.2);
+      box-shadow: 0 0 10px rgba(var(--primary), 0.3);
     }
-    .login-card button {
+    .auth-card button {
       width: 100%;
-      padding: 15px;
-      margin-top: 20px;
-      background: linear-gradient(45deg, var(--primary), #fff);
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 700;
+      padding: 12px;
+      margin: 10px 0;
+      background: var(--primary);
+      color: #ffffff;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
       border: none;
-      border-radius: 15px;
+      border-radius: 8px;
       cursor: pointer;
-      transition: all 0.3s ease;
     }
-    .login-card button:hover {
-      transform: translateY(-3px);
-      box-shadow: var(--glow);
-    }
-    .cosmic-particles {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: -1;
-    }
-    .cosmic-particle {
-      position: absolute;
-      width: 3px;
-      height: 3px;
-      background: rgba(255, 255, 255, 0.8);
-      border-radius: 50%;
-      animation: cosmicFlow 10s infinite linear;
-    }
-    @keyframes cosmicFlow {
-      0% { transform: translate(0, -100vh); opacity: 0; }
-      20% { opacity: 0.8; }
-      100% { transform: translate(0, 100vh); opacity: 0; }
-    }
+    .auth-card button:hover { background: darken(var(--primary), 10%); }
+    .auth-card .error { color: #ff4444; margin-top: 10px; font-size: 0.9em; }
+    .auth-card .signup-link { margin-top: 15px; font-size: 0.9em; }
+    .auth-card .signup-link a { color: var(--primary); text-decoration: none; }
+    .auth-card .signup-link a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
-  <div class="login-card">
-    <h1>BoardChat</h1>
+  <div class="auth-card">
+    <h1>BoardChat Enterprise</h1>
+    {% if error %}
+      <p class="error">{{ error }}</p>
+    {% endif %}
     <form method="POST" action="/login">
-      <input type="text" name="username" placeholder="Username" required>
+      <input type="email" name="email" placeholder="Email" required>
       <input type="password" name="password" placeholder="Password" required>
-      <button type="submit">Login</button>
+      <button type="submit">Sign In</button>
     </form>
+    <div class="signup-link">
+      New user? <a href="/signup">Create an account</a>
+    </div>
   </div>
-  <div class="cosmic-particles"></div>
 </body>
 </html>
