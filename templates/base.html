@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}BoardChat{% endblock %}</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet"> <!-- Added bolder weights -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- For future charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     // Dark/Light Mode Toggle
     function toggleDarkMode() {
@@ -19,25 +19,20 @@
     document.addEventListener('DOMContentLoaded', () => {
       if (localStorage.getItem('dark_mode') === 'on') document.body.classList.add('dark');
       updateTheme();
-      animateElements();
+      // Force content to stay visible after load
+      setTimeout(() => {
+        document.querySelectorAll('.animate-fade, .animate-slide').forEach(el => {
+          el.classList.add('fade-in', 'slide-in');
+          el.style.opacity = '1';
+          el.style.transform = 'translateX(0)';
+        });
+      }, 100); // Small delay to ensure DOM is ready
     });
     // Theme Update
     function updateTheme() {
       const isDark = document.body.classList.contains('dark');
       document.querySelectorAll('.theme-color').forEach(el => {
         el.style.color = isDark ? '#ffffff' : '#000000';
-      });
-    }
-    // Advanced Animations
-    function animateElements() {
-      document.querySelectorAll('.animate-fade').forEach(el => {
-        el.style.opacity = '0';
-        setTimeout(() => el.classList.add('fade-in'), 50);
-      });
-      document.querySelectorAll('.animate-slide').forEach(el => {
-        el.style.transform = 'translateX(-20px)';
-        el.style.opacity = '0';
-        setTimeout(() => el.classList.add('slide-in'), 100);
       });
     }
     // Notification Popup
@@ -54,14 +49,14 @@
       --glass: rgba(255, 255, 255, 0.1);
       --glass-border: rgba(255, 255, 255, 0.2);
       --shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
-      --primary: #00bcd4; /* Cyan theme */
+      --primary: #00bcd4;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Inter', sans-serif;
       background: url('/static/backgrounds/{{ background or 'forest' }}.jpg') no-repeat center center fixed;
       background-size: cover;
-      color: #ffffff; /* White text globally */
+      color: #ffffff;
       min-height: 100vh;
       overflow-x: hidden;
       transition: all 0.5s ease;
@@ -73,7 +68,7 @@
     }
     .container { display: flex; min-height: 100vh; }
     .sidebar {
-      width: 300px; /* Wider sidebar */
+      width: 300px;
       background: var(--glass);
       backdrop-filter: blur(16px);
       border-right: 1px solid var(--glass-border);
@@ -82,7 +77,7 @@
       position: sticky;
       top: 0;
       height: 100vh;
-      animation: slideIn 0.5s ease-out;
+      animation: slideIn 0.5s ease-out forwards;
     }
     @keyframes slideIn {
       from { transform: translateX(-100%); opacity: 0; }
@@ -93,7 +88,7 @@
       margin-bottom: 50px;
     }
     .logo img {
-      width: 120px; /* Bigger logo */
+      width: 120px;
       filter: drop-shadow(0 0 15px var(--primary));
       animation: pulse 2s infinite;
     }
@@ -109,7 +104,7 @@
       text-align: center;
       margin-bottom: 40px;
       text-shadow: 0 0 20px var(--primary);
-      animation: bounceIn 1s ease-out;
+      animation: bounceIn 1s ease-out forwards;
     }
     @keyframes bounceIn {
       0% { transform: scale(0.9); opacity: 0; }
@@ -147,7 +142,7 @@
       margin: auto;
       border: 1px solid var(--glass-border);
       box-shadow: var(--shadow);
-      animation: fadeInUp 0.5s ease-out;
+      animation: fadeInUp 0.5s ease-out forwards;
     }
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(30px); }
@@ -155,7 +150,7 @@
     }
     .animate-fade { opacity: 0; }
     .fade-in { opacity: 1; transition: opacity 0.5s ease; }
-    .animate-slide { opacity: 0; }
+    .animate-slide { opacity: 0; transform: translateX(-20px); }
     .slide-in { opacity: 1; transform: translateX(0); transition: all 0.5s ease; }
     h1 {
       font-size: 3.2em;
@@ -166,14 +161,18 @@
       -webkit-text-fill-color: transparent;
       text-shadow: 0 0 25px rgba(var(--primary), 0.6);
       font-weight: 900;
-      animation: bounceIn 1s ease-out;
+      animation: bounceIn 1s ease-out forwards;
     }
     .note {
       text-align: center;
       font-size: 1em;
       color: #ffffff;
       margin-bottom: 30px;
-      animation: fadeIn 0.5s ease-out;
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
     .dashboard {
       display: grid;
@@ -187,7 +186,7 @@
       border-radius: 15px;
       text-align: center;
       border: 1px solid var(--glass-border);
-      animation: zoomIn 0.5s ease-out;
+      animation: zoomIn 0.5s ease-out forwards;
     }
     @keyframes zoomIn {
       from { transform: scale(0.9); opacity: 0; }
@@ -218,7 +217,7 @@
       cursor: pointer;
       border: none;
       margin-top: 20px;
-      animation: slideInButton 0.5s ease-out;
+      animation: slideInButton 0.5s ease-out forwards;
     }
     @keyframes slideInButton {
       from { transform: translateX(-100%); }
@@ -238,7 +237,7 @@
       margin-top: 25px;
       line-height: 1.6;
       color: #ffffff;
-      animation: fadeIn 0.5s ease-out;
+      animation: fadeIn 0.5s ease-out forwards;
     }
     .ai-response {
       display: flex;
@@ -248,7 +247,7 @@
       background: rgba(255, 255, 255, 0.1);
       border-radius: 15px;
       border-left: 5px solid var(--primary);
-      animation: slideInLeft 0.5s ease-out;
+      animation: slideInLeft 0.5s ease-out forwards;
     }
     @keyframes slideInLeft {
       from { transform: translateX(-30px); opacity: 0; }
@@ -280,7 +279,7 @@
       text-align: center;
       border: 1px solid var(--glass-border);
       transition: all 0.3s ease;
-      animation: zoomIn 0.5s ease-out;
+      animation: zoomIn 0.5s ease-out forwards;
     }
     .tool-card:hover {
       transform: translateY(-6px);
@@ -301,13 +300,13 @@
       padding: 15px 25px;
       border-radius: 10px;
       box-shadow: var(--shadow);
-      animation: popIn 0.3s ease-out;
+      animation: popIn 0.3s ease-out forwards;
     }
     @keyframes popIn {
       from { transform: scale(0); opacity: 0; }
       to { transform: scale(1); opacity: 1; }
     }
-    .theme-color { color: #ffffff; } /* Ensure white text */
+    .theme-color { color: #ffffff; }
   </style>
 </head>
 <body class="{{ background or 'forest' }} {{ 'dark' if dark_mode == 'on' else '' }}">
@@ -322,14 +321,13 @@
         <li><a href="/tools"><i class="fas fa-tools"></i> Tools</a></li>
         <li><a href="/settings"><i class="fas fa-cog"></i> Settings</a></li>
         <li><a href="/saved_chats"><i class="fas fa-save"></i> Saved</a></li>
-        <li><a href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li> <!-- New Dashboard -->
+        <li><a href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
         <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
       </ul>
     </div>
     <div class="main">
       <div class="card animate-slide">
         {% block content %}{% endblock %}
-        <!-- Dashboard Preview -->
         <div class="dashboard animate-fade">
           <div class="dashboard-item">
             <h3>Active Chats</h3>
@@ -347,7 +345,6 @@
       </div>
     </div>
   </div>
-  <!-- Notification Hook -->
   <div id="notification"></div>
 </body>
 </html>
