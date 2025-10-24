@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h1>Dashboard</h1>
+<div class="dashboard">
+  <div class="dashboard-item">
+    <h3>Active Chats</h3>
+    <p>{{ chats }}</p>
+  </div>
+  <div class="dashboard-item">
+    <h3>AI Votes</h3>
+    <p>{{ votes }}</p>
+  </div>
+  <div class="dashboard-item">
+    <h3>Active Users</h3>
+    <p>{{ users }}</p>
+  </div>
+</div>
+<button onclick="showNotification('Dashboard updated!')">Refresh Stats</button>
+{% endblock %}
