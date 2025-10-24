@@ -97,7 +97,7 @@ def settings():
         session['theme'] = request.form.get('theme', 'forest')
         session['dark_mode'] = 'on' if 'dark_mode' in request.form else 'off'
         session['review'] = request.form.get('review', '')
-        session['share_link'] = 'https://boardchat-7ais.onrender.com'  # Your app link
+        session['share_link'] = 'https://boardchat-7ais.onrender.com'
         session['background'] = request.form.get('background', 'forest')
         return redirect(url_for('index'))
     
