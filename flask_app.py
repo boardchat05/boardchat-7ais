@@ -1,4 +1,5 @@
 from flask import Flask, request, render_template, session, redirect, url_for
+from werkzeug.security import generate_password_hash, check_password_hash
 from openai import OpenAI
 import google.generativeai as genai
 import requests
@@ -7,8 +8,10 @@ import os
 app = Flask(__name__)
 app.secret_key = 'boardchat2025rulez'
 
-# Mock user database (replace with real DB in production)
-USERS = {'admin': 'password123'}
+# Mock database for users (replace with real DB like SQLite in production)
+USERS = {  # username: hashed_password
+    'admin': generate_password_hash('password123')
+}
 
 AI_CONFIGS = {
     'openai': {
@@ -111,12 +114,39 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        if username in USERS and USERS[username] == password:
+        if username in USERS and check_password_hash(USERS[username], password):
             session['logged_in'] = True
             session['username'] = username
             return redirect(url_for('index'))
         return render_template('login.html', error="Invalid credentials")
     return render_template('login.html')
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        if username in USERS:
+            return render_template('signup.html', error="Username already exists")
+        USERS[username] = generate_password_hash(password)
+        session['logged_in'] = True
+        session['username'] = username
+        return redirect(url_for('index'))
+    return render_template('signup.html')
+
+@app.route('/change_password', methods=['GET', 'POST'])
+def change_password():
+    if 'logged_in' not in session or not session['logged_in']:
+        return redirect(url_for('login'))
+    if request.method == 'POST':
+        old_password = request.form['old_password']
+        new_password = request.form['new_password']
+        username = session['username']
+        if check_password_hash(USERS[username], old_password):
+            USERS[username] = generate_password_hash(new_password)
+            return redirect(url_for('settings', success="Password changed successfully"))
+        return redirect(url_for('change_password', error="Invalid old password"))
+    return render_template('change_password.html', success=request.args.get('success'), error=request.args.get('error'))
 
 @app.route('/tools', methods=['GET'])
 def tools():
@@ -172,60 +202,6 @@ def financial_projections():
             result = run_boardroom(query, "Financial projections for: {query}\nRevenue, costs, profit (3 years). Be concise.")
     return render_template('financial_projections.html', result=result, ai_keys=ai_keys, theme=session.get('theme', 'forest'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
 
-@app.route('/global_expansion', methods=['GET', 'POST'])
-def global_expansion():
-    if 'logged_in' not in session or not session['logged_in']:
-        return redirect(url_for('login'))
-    result = None
-    ai_keys = {ai: session.get(f'{ai}_key', '') for ai in AI_CONFIGS}
-    if request.method == 'POST':
-        query = request.form.get('query', '').strip()
-        if query:
-            result = run_boardroom(query, "Simulate a global expansion strategy for: {query}\nPropose 3 regions, market entry tactics, and estimated ROI (USD/year) by 2030. Be detailed.")
-    return render_template('global_expansion.html', result=result, ai_keys=ai_keys, theme=session.get('theme', 'forest'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
-
-@app.route('/ai_ethics_audit', methods=['GET', 'POST'])
-def ai_ethics_audit():
-    if 'logged_in' not in session or not session['logged_in']:
-        return redirect(url_for('login'))
-    result = None
-    ai_keys = {ai: session.get(f'{ai}_key', '') for ai in AI_CONFIGS}
-    if request.method == 'POST':
-        query = request.form.get('query', '').strip()
-        if query:
-            result = run_boardroom(query, "Audit the AI system: {query}\nIdentify 3 ethical risks, propose mitigation strategies, and assess compliance (1-10). Be thorough.")
-    return render_template('ai_ethics_audit.html', result=result, ai_keys=ai_keys, theme=session.get('theme', 'forest'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
-
-@app.route('/rd_breakthrough', methods=['GET', 'POST'])
-def rd_breakthrough():
-    if 'logged_in' not in session or not session['logged_in']:
-        return redirect(url_for('login'))
-    result = None
-    ai_keys = {ai: session.get(f'{ai}_key', '') for ai in AI_CONFIGS}
-    if request.method == 'POST':
-        query = request.form.get('query', '').strip()
-        if query:
-            result = run_boardroom(query, "Generate R&D breakthrough ideas for: {query}\nPropose 3 innovative projects, their potential impact, and development timeline (years). Be visionary.")
-    return render_template('rd_breakthrough.html', result=result, ai_keys=ai_keys, theme=session.get('theme', 'forest'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
-
-@app.route('/business_tools', methods=['GET'])
-def business_tools():
-    if 'logged_in' not in session or not session['logged_in']:
-        return redirect(url_for('login'))
-    return render_template('business_tools.html', theme=session.get('theme', 'forest'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
-
-@app.route('/corporate_titan_tools', methods=['GET'])
-def corporate_titan_tools():
-    if 'logged_in' not in session or not session['logged_in']:
-        return redirect(url_for('login'))
-    return render_template('corporate_titan_tools.html', theme=session.get('theme', 'forest'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
-
-@app.route('/dashboard')
-def dashboard():
-    if 'logged_in' not in session or not session['logged_in']:
-        return redirect(url_for('login'))
-    return render_template('dashboard.html', chats=12, votes=45, users=8, theme=session.get('theme', 'forest'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
-
 @app.route('/settings', methods=['GET', 'POST'])
 def settings():
     if 'logged_in' not in session or not session['logged_in']:
@@ -252,9 +228,14 @@ def saved_chats():
 
 @app.route('/logout')
 def logout():
-    session.pop('logged_in', None)
-    session.pop('username', None)
+    session.clear()
     return redirect(url_for('login'))
+
+@app.route('/dashboard')
+def dashboard():
+    if 'logged_in' not in session or not session['logged_in']:
+        return redirect(url_for('login'))
+    return render_template('dashboard.html', chats=12, votes=45, users=8, theme=session.get('theme', 'forest'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
 
 @app.route('/static/<path:path>')
 def send_static(path):
