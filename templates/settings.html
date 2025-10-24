@@ -2,19 +2,19 @@
 {% block title %}Settings - BoardChat Enterprise{% endblock %}
 {% block content %}
 <h1>Account Settings</h1>
-<div class="note">Manage your preferences and security settings.</div>
+<div class="note">Configure your preferences and security settings.</div>
 <form method="POST" action="/settings">
   <select name="theme">
     <option value="forest" {% if theme == 'forest' %}selected{% endif %}>Forest</option>
     <option value="ocean" {% if theme == 'ocean' %}selected{% endif %}>Ocean</option>
   </select>
   <label><input type="checkbox" name="dark_mode" {% if dark_mode == 'on' %}checked{% endif %}> Enable Dark Mode</label>
-  <textarea name="review" placeholder="Feedback">{{ review }}</textarea>
+  <textarea name="review" placeholder="Provide your feedback">{{ review }}</textarea>
   <select name="background">
     <option value="forest" {% if background == 'forest' %}selected{% endif %}>Forest</option>
     <option value="ocean" {% if background == 'ocean' %}selected{% endif %}>Ocean</option>
   </select>
-  <button type="submit">Save Changes</button>
+  <button type="submit">Save Preferences</button>
 </form>
 <a href="/change_password" class="theme-color">Update Password</a>
 {% if success %}
