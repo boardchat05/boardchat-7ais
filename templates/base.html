@@ -42,9 +42,10 @@
       updateBackground();
     }
 
-    // Background Update
+    // Background Update (Fixed with Session Sync)
     function updateBackground() {
-      const background = sessionStorage.getItem('background') || 'forest';
+      const background = '{{ background or session.get("background", "forest") }}';
+      sessionStorage.setItem('background', background);
       document.body.style.background = `url('/static/backgrounds/${background}.jpg') no-repeat center center fixed`;
       document.body.style.backgroundSize = 'cover';
     }
@@ -321,7 +322,7 @@
     }
   </style>
 </head>
-<body class="{{ background or 'forest' }} {{ 'dark-mode' if dark_mode == 'on' else '' }}">
+<body class="{{ background or session.get('background', 'forest') }} {{ 'dark-mode' if dark_mode == 'on' else '' }}">
   <div class="theme-toggle" onclick="toggleTheme()">
     <i class="fas fa-adjust"></i>
   </div>
