@@ -1,354 +1,126 @@
-from flask import Flask, request, render_template, session, jsonify
+from flask import Flask, request, render_template, session, redirect, url_for
 from openai import OpenAI
 import google.generativeai as genai
 import requests
+import os
 
 app = Flask(__name__)
 app.secret_key = 'boardchat2025rulez'
 
+# === 6 AI MODELS ===
 AI_CONFIGS = {
-    'openai': {
-        'model': 'gpt-4o-mini',
-        'client': lambda key: OpenAI(api_key=key),
-        'generate': lambda client, prompt: client.chat.completions.create(model=AI_CONFIGS['openai']['model'], messages=[{"role": "user", "content": prompt}]).choices[0].message.content
-    },
-    'gemini': {
-        'model': 'gemini-1.5-flash',
-        'client': lambda key: (genai.configure(api_key=key), genai.GenerativeModel(AI_CONFIGS['gemini']['model']))[1],
-        'generate': lambda client, prompt: client.generate_content(prompt).text
-    },
-    'llama': {
-        'model': 'meta-llama/llama-3.1-70b-instruct:free',
-        'endpoint': 'https://openrouter.ai/api/v1/chat/completions',
-        'generate': lambda key, prompt: requests.post(AI_CONFIGS['llama']['endpoint'], headers={'Authorization': f'Bearer {key}'}, json={
-            'model': AI_CONFIGS['llama']['model'],
-            'messages': [{'role': 'user', 'content': prompt}]
-        }).json()['choices'][0]['message']['content']
-    },
-    'claude': {
-        'model': 'anthropic/claude-3.5-sonnet',
-        'endpoint': 'https://openrouter.ai/api/v1/chat/completions',
-        'generate': lambda key, prompt: requests.post(AI_CONFIGS['claude']['endpoint'], headers={'Authorization': f'Bearer {key}'}, json={
-            'model': AI_CONFIGS['claude']['model'],
-            'messages': [{'role': 'user', 'content': prompt}]
-        }).json()['choices'][0]['message']['content']
-    },
-    'deepseek': {
-        'model': 'deepseek/deepseek-chat',
-        'endpoint': 'https://openrouter.ai/api/v1/chat/completions',
-        'generate': lambda key, prompt: requests.post(AI_CONFIGS['deepseek']['endpoint'], headers={'Authorization': f'Bearer {key}'}, json={
-            'model': AI_CONFIGS['deepseek']['model'],
-            'messages': [{'role': 'user', 'content': prompt}]
-        }).json()['choices'][0]['message']['content']
-    },
-    'grok': {
-        'model': 'x-ai/grok-beta',
-        'endpoint': 'https://openrouter.ai/api/v1/chat/completions',
-        'generate': lambda key, prompt: requests.post(AI_CONFIGS['grok']['endpoint'], headers={'Authorization': f'Bearer {key}'}, json={
-            'model': AI_CONFIGS['grok']['model'],
-            'messages': [{'role': 'user', 'content': prompt}]
-        }).json()['choices'][0]['message']['content']
-    }
+    'openai': {'model': 'gpt-4o-mini', 'client': lambda k: OpenAI(api_key=k), 'gen': lambda c,p: c.chat.completions.create(model='gpt-4o-mini', messages=[{'role':'user','content':p}]).choices[0].message.content},
+    'gemini': {'model': 'gemini-1.5-flash', 'client': lambda k: (genai.configure(api_key=k), genai.GenerativeModel('gemini-1.5-flash'))[1], 'gen': lambda c,p: c.generate_content(p).text},
+    'llama': {'model': 'meta-llama/llama-3.1-70b-instruct:free', 'endpoint': 'https://openrouter.ai/api/v1/chat/completions', 'gen': lambda k,p: requests.post('https://openrouter.ai/api/v1/chat/completions', headers={'Authorization': f'Bearer {k}'}, json={'model': 'meta-llama/llama-3.1-70b-instruct:free', 'messages': [{'role':'user','content':p}]}).json()['choices'][0]['message']['content']},
+    'claude': {'model': 'anthropic/claude-3.5-sonnet', 'endpoint': 'https://openrouter.ai/api/v1/chat/completions', 'gen': lambda k,p: requests.post('https://openrouter.ai/api/v1/chat/completions', headers={'Authorization': f'Bearer {k}'}, json={'model': 'anthropic/claude-3.5-sonnet', 'messages': [{'role':'user','content':p}]}).json()['choices'][0]['message']['content']},
+    'deepseek': {'model': 'deepseek/deepseek-chat', 'endpoint': 'https://openrouter.ai/api/v1/chat/completions', 'gen': lambda k,p: requests.post('https://openrouter.ai/api/v1/chat/completions', headers={'Authorization': f'Bearer {k}'}, json={'model': 'deepseek/deepseek-chat', 'messages': [{'role':'user','content':p}]}).json()['choices'][0]['message']['content']},
+    'grok': {'model': 'x-ai/grok-beta', 'endpoint': 'https://openrouter.ai/api/v1/chat/completions', 'gen': lambda k,p: requests.post('https://openrouter.ai/api/v1/chat/completions', headers={'Authorization': f'Bearer {k}'}, json={'model': 'x-ai/grok-beta', 'messages': [{'role':'user','content':p}]}).json()['choices'][0]['message']['content']}
 }
 
-@app.route('/', methods=['GET', 'POST'])
+def run_boardroom(query, prompt="{query}"):
+    active = {a: c for a,c in AI_CONFIGS.items() if session.get(f'{a}_key')}
+    if len(active) < 2: return "Need 2+ API keys."
+    responses = {}
+    for a, c in active.items():
+        try:
+            key = session[f'{a}_key']
+            p = prompt.format(query=query)
+            responses[a] = c['gen'](c['client'](key) if 'client' in c else key, p)
+        except Exception as e:
+            responses[a] = f"[ERROR] {a.upper()}: {str(e)}"
+    numbered = "\n".join([f"{i+1}. {a.upper()}: {r}" for i,(a,r) in enumerate(responses.items())])
+    vote_prompt = f"Vote for best. Reply ONLY with number:\n{numbered}"
+    votes = {i+1:0 for i in range(len(responses))}
+    for a, c in active.items():
+        try:
+            key = session[f'{a}_key']
+            vote = c['gen'](c['client'](key) if 'client' in c else key, vote_prompt)
+            num = int(vote.strip())
+            if 1 <= num <= len(votes): votes[num] += 1
+        except: pass
+    best = max(votes, key=votes.get)
+    winner = list(responses.keys())[best-1].upper()
+    result = f"**{winner} WINS ({votes[best]} votes)!**\n\n{responses[winner.lower()]}\n\n---\n\n**All Answers:**\n" + "\n\n".join([f"**{a.upper()}:**\n{r}" for a,r in responses.items()])
+    session['last_chat'] = result  # SAVE CHAT
+    return result
+
+@app.route('/', methods=['GET','POST'])
 def index():
     result = None
-    ai_keys = {ai: session.get(f'{ai}_key', '') for ai in AI_CONFIGS.keys()}
+    keys = {a: session.get(f'{a}_key','') for a in AI_CONFIGS}
     if request.method == 'POST':
-        for ai in AI_CONFIGS.keys():
-            session[f'{ai}_key'] = request.form.get(f'{ai}_key')
-        query = request.form.get('query')
-        if query:
-            active_ais = {ai: config for ai, config in AI_CONFIGS.items() if session.get(f'{ai}_key')}
-            if len(active_ais) < 2:
-                result = "Need 2+ API keys for boardroom voting."
-            else:
-                responses = {}
-                for ai, config in active_ais.items():
-                    try:
-                        key = session[f'{ai}_key']
-                        if 'endpoint' in config:
-                            resp = config['generate'](key, query)
-                        else:
-                            client = config['client'](key)
-                            resp = config['generate'](client, query)
-                        responses[ai] = resp
-                    except Exception as e:
-                        responses[ai] = f"Error from {ai.upper()}: {str(e)}"
+        for a in AI_CONFIGS: session[f'{a}_key'] = request.form.get(f'{a}_key','').strip()
+        query = request.form.get('query','').strip()
+        if query: result = run_boardroom(query)
+    return render_template('index.html', result=result, ai_keys=keys, theme=session.get('theme', 'blue'), dark_mode=session.get('dark_mode', 'off'))
 
-                ai_list = list(responses.keys())
-                numbered_responses = "\n".join([f"{i+1}. {ai.upper()}: {responses[ai]}" for i, ai in enumerate(ai_list)])
-                vote_prompt = (
-                    f"Boardroom vote for best answer to: '{query}'\nProposals:\n{numbered_responses}\n"
-                    f"Vote for the most accurate, clear, relevant answer. Reply ONLY with the number (1-{len(ai_list)})."
-                )
-
-                votes = {i+1: 0 for i in range(len(ai_list))}
-                for ai, config in active_ais.items():
-                    try:
-                        key = session[f'{ai}_key']
-                        if 'endpoint' in config:
-                            vote = config['generate'](key, vote_prompt)
-                        else:
-                            client = config['client'](key)
-                            vote = config['generate'](client, vote_prompt)
-                        num = int(vote.strip())
-                        if 1 <= num <= len(ai_list):
-                            votes[num] += 1
-                    except (ValueError, Exception):
-                        pass
-
-                best_num = max(votes, key=votes.get)
-                best_ai = ai_list[best_num - 1].upper()
-                best_answer = responses[best_ai.lower()]
-                result = (
-                    f"**Boardroom Decision ({votes[best_num]} votes):** {best_ai} wins!\n\n{best_answer}\n\n"
-                    f"---\n\n**All {len(ai_list)} Proposals:**\n"
-                    f"{'\n\n'.join([f'**{ai.upper()}:**\n{resp}' for ai, resp in responses.items()])}"
-                )
-
-    return render_template('index.html', result=result, ai_keys=ai_keys)
-
-@app.route('/tools', methods=['GET'])
-def tools():
-    return render_template('tools.html')
-
-@app.route('/idea_eval', methods=['GET', 'POST'])
+@app.route('/idea_eval', methods=['GET','POST'])
 def idea_eval():
     result = None
-    ai_keys = {ai: session.get(f'{ai}_key', '') for ai in AI_CONFIGS.keys()}
+    keys = {a: session.get(f'{a}_key','') for a in AI_CONFIGS}
     if request.method == 'POST':
-        query = request.form.get('query')
-        if query:
-            active_ais = {ai: config for ai, config in AI_CONFIGS.items() if session.get(f'{ai}_key')}
-            if len(active_ais) < 2:
-                result = "Need 2+ API keys for idea evaluation."
-            else:
-                prompt = f"Evaluate the business idea: {query}. Provide pros, cons, market fit (1-10), and potential revenue (USD/year). Be concise."
-                responses = {}
-                for ai, config in active_ais.items():
-                    try:
-                        key = session[f'{ai}_key']
-                        if 'endpoint' in config:
-                            resp = config['generate'](key, prompt)
-                        else:
-                            client = config['client'](key)
-                            resp = config['generate'](client, prompt)
-                        responses[ai] = resp
-                    except Exception as e:
-                        responses[ai] = f"Error from {ai.upper()}: {str(e)}"
+        query = request.form.get('query','').strip()
+        if query: result = run_boardroom(query, "Evaluate: {query}\nPros, cons, market fit (1-10), revenue. Be concise.")
+    return render_template('idea_eval.html', result=result, ai_keys=keys, theme=session.get('theme', 'blue'), dark_mode=session.get('dark_mode', 'off'))
 
-                ai_list = list(responses.keys())
-                numbered_responses = "\n".join([f"{i+1}. {ai.upper()}: {responses[ai]}" for i, ai in enumerate(ai_list)])
-                vote_prompt = (
-                    f"Vote for the best business idea evaluation for: '{query}'\nEvaluations:\n{numbered_responses}\n"
-                    f"Vote for the most viable idea based on market fit and revenue potential. Reply ONLY with the number (1-{len(ai_list)})."
-                )
-
-                votes = {i+1: 0 for i in range(len(ai_list))}
-                for ai, config in active_ais.items():
-                    try:
-                        key = session[f'{ai}_key']
-                        if 'endpoint' in config:
-                            vote = config['generate'](key, vote_prompt)
-                        else:
-                            client = config['client'](key)
-                            vote = config['generate'](client, vote_prompt)
-                        num = int(vote.strip())
-                        if 1 <= num <= len(ai_list):
-                            votes[num] += 1
-                    except (ValueError, Exception):
-                        pass
-
-                best_num = max(votes, key=votes.get)
-                best_ai = ai_list[best_num - 1].upper()
-                best_answer = responses[best_ai.lower()]
-                result = (
-                    f"**Best Business Idea ({votes[best_num]} votes):** {best_ai} wins!\n\n{best_answer}\n\n"
-                    f"---\n\n**All {len(ai_list)} Evaluations:**\n"
-                    f"{'\n\n'.join([f'**{ai.upper()}:**\n{resp}' for ai, resp in responses.items()])}"
-                )
-    return render_template('idea_eval.html', result=result, ai_keys=ai_keys)
-
-@app.route('/market_research', methods=['GET', 'POST'])
+@app.route('/market_research', methods=['GET','POST'])
 def market_research():
     result = None
-    ai_keys = {ai: session.get(f'{ai}_key', '') for ai in AI_CONFIGS.keys()}
+    keys = {a: session.get(f'{a}_key','') for a in AI_CONFIGS}
     if request.method == 'POST':
-        query = request.form.get('query')
-        if query:
-            active_ais = {ai: config for ai, config in AI_CONFIGS.items() if session.get(f'{ai}_key')}
-            if len(active_ais) < 2:
-                result = "Need 2+ API keys for market research."
-            else:
-                prompt = f"Summarize market research for: {query}. Provide key trends, opportunities, and challenges. Be concise."
-                responses = {}
-                for ai, config in active_ais.items():
-                    try:
-                        key = session[f'{ai}_key']
-                        if 'endpoint' in config:
-                            resp = config['generate'](key, prompt)
-                        else:
-                            client = config['client'](key)
-                            resp = config['generate'](client, prompt)
-                        responses[ai] = resp
-                    except Exception as e:
-                        responses[ai] = f"Error from {ai.upper()}: {str(e)}"
+        query = request.form.get('query','').strip()
+        if query: result = run_boardroom(query, "Market research for: {query}\nTrends, opportunities, challenges. Be concise.")
+    return render_template('market_research.html', result=result, ai_keys=keys, theme=session.get('theme', 'blue'), dark_mode=session.get('dark_mode', 'off'))
 
-                ai_list = list(responses.keys())
-                numbered_responses = "\n".join([f"{i+1}. {ai.upper()}: {responses[ai]}" for i, ai in enumerate(ai_list)])
-                vote_prompt = (
-                    f"Vote for the best market research summary for: '{query}'\nSummaries:\n{numbered_responses}\n"
-                    f"Vote for the most insightful and accurate summary. Reply ONLY with the number (1-{len(ai_list)})."
-                )
-
-                votes = {i+1: 0 for i in range(len(ai_list))}
-                for ai, config in active_ais.items():
-                    try:
-                        key = session[f'{ai}_key']
-                        if 'endpoint' in config:
-                            vote = config['generate'](key, vote_prompt)
-                        else:
-                            client = config['client'](key)
-                            vote = config['generate'](client, vote_prompt)
-                        num = int(vote.strip())
-                        if 1 <= num <= len(ai_list):
-                            votes[num] += 1
-                    except (ValueError, Exception):
-                        pass
-
-                best_num = max(votes, key=votes.get)
-                best_ai = ai_list[best_num - 1].upper()
-                best_answer = responses[best_ai.lower()]
-                result = (
-                    f"**Best Market Research ({votes[best_num]} votes):** {best_ai} wins!\n\n{best_answer}\n\n"
-                    f"---\n\n**All {len(ai_list)} Summaries:**\n"
-                    f"{'\n\n'.join([f'**{ai.upper()}:**\n{resp}' for ai, resp in responses.items()])}"
-                )
-    return render_template('market_research.html', result=result, ai_keys=ai_keys)
-
-@app.route('/competitive_analysis', methods=['GET', 'POST'])
+@app.route('/competitive_analysis', methods=['GET','POST'])
 def competitive_analysis():
     result = None
-    ai_keys = {ai: session.get(f'{ai}_key', '') for ai in AI_CONFIGS.keys()}
+    keys = {a: session.get(f'{a}_key','') for a in AI_CONFIGS}
     if request.method == 'POST':
-        query = request.form.get('query')
-        if query:
-            active_ais = {ai: config for ai, config in AI_CONFIGS.items() if session.get(f'{ai}_key')}
-            if len(active_ais) < 2:
-                result = "Need 2+ API keys for competitive analysis."
-            else:
-                prompt = f"Analyze competitors for: {query}. Provide strengths, weaknesses, and actionable recommendations. Be concise."
-                responses = {}
-                for ai, config in active_ais.items():
-                    try:
-                        key = session[f'{ai}_key']
-                        if 'endpoint' in config:
-                            resp = config['generate'](key, prompt)
-                        else:
-                            client = config['client'](key)
-                            resp = config['generate'](client, prompt)
-                        responses[ai] = resp
-                    except Exception as e:
-                        responses[ai] = f"Error from {ai.upper()}: {str(e)}"
+        query = request.form.get('query','').strip()
+        if query: result = run_boardroom(query, "Competitor analysis: {query}\nStrengths, weaknesses, recommendations. Be concise.")
+    return render_template('competitive_analysis.html', result=result, ai_keys=keys, theme=session.get('theme', 'blue'), dark_mode=session.get('dark_mode', 'off'))
 
-                ai_list = list(responses.keys())
-                numbered_responses = "\n".join([f"{i+1}. {ai.upper()}: {responses[ai]}" for i, ai in enumerate(ai_list)])
-                vote_prompt = (
-                    f"Vote for the best competitive analysis for: '{query}'\nAnalyses:\n{numbered_responses}\n"
-                    f"Vote for the most actionable and insightful analysis. Reply ONLY with the number (1-{len(ai_list)})."
-                )
-
-                votes = {i+1: 0 for i in range(len(ai_list))}
-                for ai, config in active_ais.items():
-                    try:
-                        key = session[f'{ai}_key']
-                        if 'endpoint' in config:
-                            vote = config['generate'](key, vote_prompt)
-                        else:
-                            client = config['client'](key)
-                            vote = config['generate'](client, vote_prompt)
-                        num = int(vote.strip())
-                        if 1 <= num <= len(ai_list):
-                            votes[num] += 1
-                    except (ValueError, Exception):
-                        pass
-
-                best_num = max(votes, key=votes.get)
-                best_ai = ai_list[best_num - 1].upper()
-                best_answer = responses[best_ai.lower()]
-                result = (
-                    f"**Best Competitive Analysis ({votes[best_num]} votes):** {best_ai} wins!\n\n{best_answer}\n\n"
-                    f"---\n\n**All {len(ai_list)} Analyses:**\n"
-                    f"{'\n\n'.join([f'**{ai.upper()}:**\n{resp}' for ai, resp in responses.items()])}"
-                )
-    return render_template('competitive_analysis.html', result=result, ai_keys=ai_keys)
-
-@app.route('/financial_projections', methods=['GET', 'POST'])
+@app.route('/financial_projections', methods=['GET','POST'])
 def financial_projections():
     result = None
-    ai_keys = {ai: session.get(f'{ai}_key', '') for ai in AI_CONFIGS.keys()}
+    keys = {a: session.get(f'{a}_key','') for a in AI_CONFIGS}
     if request.method == 'POST':
-        query = request.form.get('query')
-        if query:
-            active_ais = {ai: config for ai, config in AI_CONFIGS.items() if session.get(f'{ai}_key')}
-            if len(active_ais) < 2:
-                result = "Need 2+ API keys for financial projections."
-            else:
-                prompt = f"Generate financial projections for: {query}. Provide estimated revenue, costs, and net profit (USD/year) for the next 3 years. Be concise."
-                responses = {}
-                for ai, config in active_ais.items():
-                    try:
-                        key = session[f'{ai}_key']
-                        if 'endpoint' in config:
-                            resp = config['generate'](key, prompt)
-                        else:
-                            client = config['client'](key)
-                            resp = config['generate'](client, prompt)
-                        responses[ai] = resp
-                    except Exception as e:
-                        responses[ai] = f"Error from {ai.upper()}: {str(e)}"
+        query = request.form.get('query','').strip()
+        if query: result = run_boardroom(query, "Financial projections for: {query}\nRevenue, costs, profit (3 years). Be concise.")
+    return render_template('financial_projections.html', result=result, ai_keys=keys, theme=session.get('theme', 'blue'), dark_mode=session.get('dark_mode', 'off'))
 
-                ai_list = list(responses.keys())
-                numbered_responses = "\n".join([f"{i+1}. {ai.upper()}: {responses[ai]}" for i, ai in enumerate(ai_list)])
-                vote_prompt = (
-                    f"Vote for the best financial projection for: '{query}'\nProjections:\n{numbered_responses}\n"
-                    f"Vote for the most realistic and detailed projection. Reply ONLY with the number (1-{len(ai_list)})."
-                )
+@app.route('/settings', methods=['GET','POST'])
+def settings():
+    if request.method == 'POST':
+        # Save theme, mode, and review
+        session['theme'] = request.form.get('theme', 'blue')
+        session['dark_mode'] = 'on' if 'dark_mode' in request.form else 'off'
+        session['review'] = request.form.get('review', '')
+        session['share_link'] = 'https://boardchat-7ais.onrender.com'  # Your app link
+        return redirect(url_for('index'))
+    
+    # Load current settings
+    current_theme = session.get('theme', 'blue')
+    current_mode = session.get('dark_mode', 'off')
+    current_review = session.get('review', '')
+    
+    return render_template('settings.html', theme=current_theme, dark_mode=current_mode, review=current_review)
 
-                votes = {i+1: 0 for i in range(len(ai_list))}
-                for ai, config in active_ais.items():
-                    try:
-                        key = session[f'{ai}_key']
-                        if 'endpoint' in config:
-                            vote = config['generate'](key, vote_prompt)
-                        else:
-                            client = config['client'](key)
-                            vote = config['generate'](client, vote_prompt)
-                        num = int(vote.strip())
-                        if 1 <= num <= len(ai_list):
-                            votes[num] += 1
-                    except (ValueError, Exception):
-                        pass
+@app.route('/saved_chats')
+def saved_chats():
+    result = session.get('last_chat', 'No saved chats yet.')
+    return render_template('saved_chats.html', result=result, theme=session.get('theme', 'blue'), dark_mode=session.get('dark_mode', 'off'))
 
-                best_num = max(votes, key=votes.get)
-                best_ai = ai_list[best_num - 1].upper()
-                best_answer = responses[best_ai.lower()]
-                result = (
-                    f"**Best Financial Projection ({votes[best_num]} votes):** {best_ai} wins!\n\n{best_answer}\n\n"
-                    f"---\n\n**All {len(ai_list)} Projections:**\n"
-                    f"{'\n\n'.join([f'**{ai.upper()}:**\n{resp}' for ai, resp in responses.items()])}"
-                )
-    return render_template('financial_projections.html', result=result, ai_keys=ai_keys)
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('index'))
 
-@app.route('/business_tools', methods=['GET'])
-def business_tools():
-    return render_template('business_tools.html')
-
-@app.route('/corporate_titan_tools', methods=['GET'])
-def corporate_titan_tools():
-    return render_template('corporate_titan_tools.html')
+@app.route('/tools')
+def tools():
+    return render_template('tools.html', theme=session.get('theme', 'blue'), dark_mode=session.get('dark_mode', 'off'))
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
