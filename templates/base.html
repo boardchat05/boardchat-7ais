@@ -28,6 +28,7 @@
       updateWeather();
       setInterval(updateTimeDate, 1000);
       setInterval(updateStockChart, 30000); // Update stock every 30s
+      updateBackground();
     });
 
     // Theme Update
@@ -38,6 +39,14 @@
       document.querySelectorAll('.theme-color').forEach(el => {
         el.style.color = isDark ? '#ffffff' : '#1a1a1a';
       });
+      updateBackground();
+    }
+
+    // Background Update
+    function updateBackground() {
+      const background = sessionStorage.getItem('background') || 'forest';
+      document.body.style.background = `url('/static/backgrounds/${background}.jpg') no-repeat center center fixed`;
+      document.body.style.backgroundSize = 'cover';
     }
 
     // Stock Market Chart (Mock Data)
@@ -66,7 +75,6 @@
           });
         })
         .catch(() => {
-          // Fallback mock data
           const ctx = document.getElementById('stockChart').getContext('2d');
           new Chart(ctx, {
             type: 'line',
@@ -98,8 +106,7 @@
 
     // Weather Widget (Mock Data)
     function updateWeather() {
-      // Replace with real weather API (e.g., OpenWeatherMap)
-      const weatherData = { temp: '22°C', condition: 'Sunny', icon: '☀️' };
+      const weatherData = { temp: '22°C', condition: 'Sunny', icon: '☀️' }; // Replace with OpenWeatherMap API
       document.getElementById('weather-temp').textContent = weatherData.temp;
       document.getElementById('weather-condition').textContent = weatherData.condition;
       document.getElementById('weather-icon').textContent = weatherData.icon;
@@ -107,11 +114,10 @@
 
     // News Feed (Mock Data)
     function updateNews() {
-      // Replace with real news API (e.g., NewsAPI)
       const newsData = [
         { title: 'Tech Surge', image: 'https://via.placeholder.com/100', summary: 'Tech stocks rise 5% today.' },
         { title: 'Market Dip', image: 'https://via.placeholder.com/100', summary: 'Energy sector falls 3%.' }
-      ];
+      ]; // Replace with NewsAPI
       const newsContainer = document.getElementById('news-feed');
       newsContainer.innerHTML = newsData.map(item => `
         <div class="news-item">
@@ -139,7 +145,6 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Lato', sans-serif;
-      background: var(--bg-color);
       color: var(--text-color);
       min-height: 100vh;
       transition: all 0.3s ease;
@@ -258,7 +263,7 @@
       border: none;
       cursor: pointer;
     }
-    button:hover { background: darken(var(--primary), 10%); }
+    button:hover { background: #0056b3; }
     pre {
       background: rgba(0, 0, 0, 0.1);
       padding: 15px;
@@ -316,7 +321,7 @@
     }
   </style>
 </head>
-<body>
+<body class="{{ background or 'forest' }} {{ 'dark-mode' if dark_mode == 'on' else '' }}">
   <div class="theme-toggle" onclick="toggleTheme()">
     <i class="fas fa-adjust"></i>
   </div>
