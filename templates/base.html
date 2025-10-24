@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}BoardChat{% endblock %}</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"> <!-- Font Awesome Icons -->
   <script>
     // Dark/Light Mode Toggle
     function toggleDarkMode() {
@@ -19,6 +20,10 @@
     }
     // Load saved mode
     if (localStorage.getItem('dark_mode') === 'on') document.body.classList.add('dark');
+    // Animation on Load
+    window.addEventListener('load', () => {
+      document.querySelectorAll('.animate-fade').forEach(el => el.classList.add('fade-in'));
+    });
   </script>
   <style>
     :root {
@@ -58,20 +63,33 @@
       position: sticky;
       top: 0;
       height: 100vh;
+      animation: slideIn 0.5s ease-out;
+    }
+    @keyframes slideIn {
+      from { transform: translateX(-100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
     }
     .logo { text-align: center; margin-bottom: 40px; }
-    .logo img { width: 60px; filter: drop-shadow(0 0 10px var(--primary)); }
+    .logo img { width: 60px; filter: drop-shadow(0 0 10px var(--primary)); animation: pulse 2s infinite; }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
     .sidebar h2 {
       color: var(--text);
       font-size: 1.6em;
       text-align: center;
       margin-bottom: 30px;
       text-shadow: 0 0 15px var(--primary);
+      font-weight: 700;
     }
     .sidebar ul { list-style: none; }
     .sidebar li { margin: 12px 0; }
     .sidebar a {
-      display: block;
+      display: flex;
+      align-items: center;
+      gap: 10px;
       padding: 14px 20px;
       color: var(--text);
       text-decoration: none;
@@ -81,6 +99,7 @@
       background: rgba(255,255,255,0.05);
       border: 1px solid var(--glass-border);
     }
+    .sidebar a i { font-size: 1.2em; }
     .sidebar a:hover {
       background: rgba(var(--primary), 0.3);
       transform: translateY(-2px);
@@ -96,7 +115,14 @@
       margin: auto;
       border: 1px solid var(--glass-border);
       box-shadow: var(--shadow);
+      animation: fadeInUp 0.5s ease-out;
     }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade { opacity: 0; }
+    .fade-in { opacity: 1; transition: opacity 0.5s ease; }
     h1 {
       font-size: 2.8em;
       text-align: center;
@@ -105,6 +131,13 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       text-shadow: 0 0 20px rgba(var(--primary), 0.5);
+      font-weight: 700;
+      animation: bounceIn 1s ease-out;
+    }
+    @keyframes bounceIn {
+      0% { transform: scale(0.9); opacity: 0; }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); opacity: 1; }
     }
     .note { text-align: center; font-size: 0.95em; color: var(--text); margin-bottom: 25px; }
     input, button {
@@ -116,7 +149,7 @@
       font-size: 16px;
       background: rgba(255,255,255,0.1);
       color: var(--text);
-      transition: 0.3s;
+      transition: all 0.3s ease;
     }
     input::placeholder { color: rgba(var(--text), 0.5); }
     input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 15px rgba(var(--primary), 0.5); }
@@ -126,6 +159,11 @@
       cursor: pointer;
       border: none;
       margin-top: 15px;
+      animation: slideInButton 0.5s ease-out;
+    }
+    @keyframes slideInButton {
+      from { transform: translateX(-100%); }
+      to { transform: translateX(0); }
     }
     button:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(var(--primary), 0.4); }
     pre {
@@ -138,6 +176,7 @@
       margin-top: 20px;
       line-height: 1.6;
       color: var(--text);
+      animation: fadeIn 0.5s ease-out;
     }
     .ai-response {
       display: flex;
@@ -147,6 +186,11 @@
       background: rgba(255,255,255,0.05);
       border-radius: 14px;
       border-left: 4px solid var(--primary);
+      animation: slideInLeft 0.5s ease-out;
+    }
+    @keyframes slideInLeft {
+      from { transform: translateX(-20px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
     }
     .ai-logo {
       width: 32px;
@@ -168,7 +212,12 @@
       border-radius: 16px;
       text-align: center;
       border: 1px solid var(--glass-border);
-      transition: 0.3s;
+      transition: all 0.3s ease;
+      animation: zoomIn 0.5s ease-out;
+    }
+    @keyframes zoomIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
     .tool-card:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
     .tool-card a { color: var(--text); font-weight: bold; text-decoration: none; font-size: 1.1em; }
@@ -176,21 +225,21 @@
 </head>
 <body class="{{ background or 'forest' }} {{ 'dark' if dark_mode == 'on' else '' }}">
   <div class="container">
-    <div class="sidebar">
+    <div class="sidebar animate-fade">
       <div class="logo">
         <img src="/static/logo.png" alt="BoardChat Logo">
       </div>
       <h2>BoardChat</h2>
       <ul>
-        <li><a href="/">Boardroom</a></li>
-        <li><a href="/tools">Tools</a></li>
-        <li><a href="/settings">Settings</a></li>
-        <li><a href="/saved_chats">Saved</a></li>
-        <li><a href="/logout">Logout</a></li>
+        <li><a href="/"><i class="fas fa-users"></i> Boardroom</a></li>
+        <li><a href="/tools"><i class="fas fa-tools"></i> Tools</a></li>
+        <li><a href="/settings"><i class="fas fa-cog"></i> Settings</a></li>
+        <li><a href="/saved_chats"><i class="fas fa-save"></i> Saved</a></li>
+        <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
       </ul>
     </div>
     <div class="main">
-      <div class="card">
+      <div class="card animate-fade">
         {% block content %}{% endblock %}
       </div>
     </div>
