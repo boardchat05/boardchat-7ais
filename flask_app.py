@@ -123,6 +123,11 @@ def logout():
 def tools():
     return render_template('tools.html', theme=session.get('theme', 'forest'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
 
+# Serve static files explicitly (fallback for Render)
+@app.route('/static/<path:path>')
+def send_static(path):
+    return app.send_static_file(path)
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
