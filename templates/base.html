@@ -42,60 +42,34 @@
       updateBackground();
     }
 
-    // Background Update (Fixed with Session Sync)
+    // Background Update (Synced with Session)
     function updateBackground() {
       const background = '{{ background or session.get("background", "forest") }}';
-      sessionStorage.setItem('background', background);
       document.body.style.background = `url('/static/backgrounds/${background}.jpg') no-repeat center center fixed`;
       document.body.style.backgroundSize = 'cover';
     }
 
     // Stock Market Chart (Mock Data)
     function updateStockChart() {
-      fetch('https://api.example.com/stock-data') // Replace with real API
-        .then(response => response.json())
-        .then(data => {
-          const ctx = document.getElementById('stockChart').getContext('2d');
-          new Chart(ctx, {
-            type: 'line',
-            data: {
-              labels: data.labels,
-              datasets: [{
-                label: 'S&P 500',
-                data: data.values,
-                borderColor: 'rgba(0, 188, 212, 1)',
-                backgroundColor: 'rgba(0, 188, 212, 0.2)',
-                borderWidth: 2,
-                fill: true
-              }]
-            },
-            options: {
-              scales: { y: { beginAtZero: false } },
-              animation: { duration: 1000 }
-            }
-          });
-        })
-        .catch(() => {
-          const ctx = document.getElementById('stockChart').getContext('2d');
-          new Chart(ctx, {
-            type: 'line',
-            data: {
-              labels: ['10:00', '10:30', '11:00', '11:30'],
-              datasets: [{
-                label: 'S&P 500',
-                data: [4500, 4520, 4510, 4530],
-                borderColor: 'rgba(0, 188, 212, 1)',
-                backgroundColor: 'rgba(0, 188, 212, 0.2)',
-                borderWidth: 2,
-                fill: true
-              }]
-            },
-            options: {
-              scales: { y: { beginAtZero: false } },
-              animation: { duration: 1000 }
-            }
-          });
-        });
+      const ctx = document.getElementById('stockChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['10:00', '10:30', '11:00', '11:30', '12:00'],
+          datasets: [{
+            label: 'S&P 500',
+            data: [4500, 4520, 4510, 4530, 4540],
+            borderColor: 'rgba(0, 188, 212, 1)',
+            backgroundColor: 'rgba(0, 188, 212, 0.2)',
+            borderWidth: 2,
+            fill: true
+          }]
+        },
+        options: {
+          scales: { y: { beginAtZero: false } },
+          animation: { duration: 1000 }
+        }
+      });
     }
 
     // Time and Date Widget
@@ -107,18 +81,18 @@
 
     // Weather Widget (Mock Data)
     function updateWeather() {
-      const weatherData = { temp: '22°C', condition: 'Sunny', icon: '☀️' }; // Replace with OpenWeatherMap API
+      const weatherData = { temp: '22°C', condition: 'Sunny', icon: '☀️' };
       document.getElementById('weather-temp').textContent = weatherData.temp;
       document.getElementById('weather-condition').textContent = weatherData.condition;
       document.getElementById('weather-icon').textContent = weatherData.icon;
     }
 
-    // News Feed (Mock Data)
+    // News Feed (Mock Data with Images)
     function updateNews() {
       const newsData = [
         { title: 'Tech Surge', image: 'https://via.placeholder.com/100', summary: 'Tech stocks rise 5% today.' },
         { title: 'Market Dip', image: 'https://via.placeholder.com/100', summary: 'Energy sector falls 3%.' }
-      ]; // Replace with NewsAPI
+      ];
       const newsContainer = document.getElementById('news-feed');
       newsContainer.innerHTML = newsData.map(item => `
         <div class="news-item">
