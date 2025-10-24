@@ -2,376 +2,324 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}BoardChat{% endblock %}</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}BoardChat Enterprise{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
   <script>
-    // Dark/Light Mode Toggle
-    function toggleDarkMode() {
+    // Theme Toggle
+    function toggleTheme() {
       const body = document.body;
-      body.classList.toggle('dark');
-      localStorage.setItem('dark_mode', body.classList.contains('dark') ? 'on' : 'off');
+      body.classList.toggle('dark-mode');
+      localStorage.setItem('theme', body.classList.contains('dark-mode') ? 'dark' : 'light');
       updateTheme();
-      initChart(); // Refresh chart on mode change
+      updateStockChart();
+      updateWeather();
     }
-    // Load and Theme Setup
+
+    // Load Theme and Initialize
     document.addEventListener('DOMContentLoaded', () => {
-      if (localStorage.getItem('dark_mode') === 'on') document.body.classList.add('dark');
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      if (savedTheme === 'dark') document.body.classList.add('dark-mode');
       updateTheme();
-      initChart();
-      createCosmicParticles();
+      updateStockChart();
+      updateWeather();
+      setInterval(updateTimeDate, 1000);
+      setInterval(updateStockChart, 30000); // Update stock every 30s
     });
+
     // Theme Update
     function updateTheme() {
-      const isDark = document.body.classList.contains('dark');
-      document.documentElement.style.setProperty('--text', isDark ? '#ffffff' : '#1a1a1a');
+      const isDark = document.body.classList.contains('dark-mode');
+      document.documentElement.style.setProperty('--text-color', isDark ? '#ffffff' : '#1a1a1a');
+      document.documentElement.style.setProperty('--bg-color', isDark ? '#1a1a1a' : '#f4f7fa');
       document.querySelectorAll('.theme-color').forEach(el => {
         el.style.color = isDark ? '#ffffff' : '#1a1a1a';
       });
     }
-    // Chart Initialization
-    function initChart() {
-      const ctx = document.getElementById('dashboardChart')?.getContext('2d');
-      if (ctx) {
-        new Chart(ctx, {
-          type: 'bar',
-          data: {
-            labels: ['Chats', 'Votes', 'Users'],
-            datasets: [{
-              label: 'Activity',
-              data: [12, 45, 8],
-              backgroundColor: 'rgba(0, 188, 212, 0.7)',
-              borderColor: 'rgba(0, 188, 212, 1)',
-              borderWidth: 1
-            }]
-          },
-          options: { scales: { y: { beginAtZero: true } } }
+
+    // Stock Market Chart (Mock Data)
+    function updateStockChart() {
+      fetch('https://api.example.com/stock-data') // Replace with real API
+        .then(response => response.json())
+        .then(data => {
+          const ctx = document.getElementById('stockChart').getContext('2d');
+          new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: data.labels,
+              datasets: [{
+                label: 'S&P 500',
+                data: data.values,
+                borderColor: 'rgba(0, 188, 212, 1)',
+                backgroundColor: 'rgba(0, 188, 212, 0.2)',
+                borderWidth: 2,
+                fill: true
+              }]
+            },
+            options: {
+              scales: { y: { beginAtZero: false } },
+              animation: { duration: 1000 }
+            }
+          });
+        })
+        .catch(() => {
+          // Fallback mock data
+          const ctx = document.getElementById('stockChart').getContext('2d');
+          new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: ['10:00', '10:30', '11:00', '11:30'],
+              datasets: [{
+                label: 'S&P 500',
+                data: [4500, 4520, 4510, 4530],
+                borderColor: 'rgba(0, 188, 212, 1)',
+                backgroundColor: 'rgba(0, 188, 212, 0.2)',
+                borderWidth: 2,
+                fill: true
+              }]
+            },
+            options: {
+              scales: { y: { beginAtZero: false } },
+              animation: { duration: 1000 }
+            }
+          });
         });
-      }
     }
-    // Cosmic Particle Effect
-    function createCosmicParticles() {
-      const particleContainer = document.createElement('div');
-      particleContainer.className = 'cosmic-particles';
-      document.body.appendChild(particleContainer);
-      for (let i = 0; i < 100; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'cosmic-particle';
-        particle.style.left = `${Math.random() * 100}vw`;
-        particle.style.animationDelay = `${Math.random() * 10}s`;
-        particleContainer.appendChild(particle);
-      }
+
+    // Time and Date Widget
+    function updateTimeDate() {
+      const now = moment();
+      document.getElementById('time').textContent = now.format('HH:mm:ss');
+      document.getElementById('date').textContent = now.format('MMMM D, YYYY');
     }
-    // Notification Popup
-    function showNotification(message) {
-      const noti = document.createElement('div');
-      noti.className = 'notification';
-      noti.textContent = message;
-      document.body.appendChild(noti);
-      setTimeout(() => noti.remove(), 3000);
+
+    // Weather Widget (Mock Data)
+    function updateWeather() {
+      // Replace with real weather API (e.g., OpenWeatherMap)
+      const weatherData = { temp: '22°C', condition: 'Sunny', icon: '☀️' };
+      document.getElementById('weather-temp').textContent = weatherData.temp;
+      document.getElementById('weather-condition').textContent = weatherData.condition;
+      document.getElementById('weather-icon').textContent = weatherData.icon;
     }
+
+    // News Feed (Mock Data)
+    function updateNews() {
+      // Replace with real news API (e.g., NewsAPI)
+      const newsData = [
+        { title: 'Tech Surge', image: 'https://via.placeholder.com/100', summary: 'Tech stocks rise 5% today.' },
+        { title: 'Market Dip', image: 'https://via.placeholder.com/100', summary: 'Energy sector falls 3%.' }
+      ];
+      const newsContainer = document.getElementById('news-feed');
+      newsContainer.innerHTML = newsData.map(item => `
+        <div class="news-item">
+          <img src="${item.image}" alt="${item.title}">
+          <div>
+            <h3>${item.title}</h3>
+            <p>${item.summary}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', updateNews);
+    setInterval(updateNews, 60000); // Update news every minute
   </script>
   <style>
     :root {
-      --glass: rgba(255, 255, 255, 0.2);
-      --glass-border: linear-gradient(to bottom, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.1));
-      --text: #ffffff;
-      --shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-      --primary: #00bcd4;
-      --glow: 0 0 15px rgba(0, 188, 212, 0.8);
+      --glass: rgba(255, 255, 255, 0.15);
+      --glass-border: rgba(255, 255, 255, 0.3);
+      --text-color: #1a1a1a;
+      --bg-color: #f4f7fa;
+      --primary: #007bff;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: 'Open Sans', sans-serif;
-      background: url('/static/backgrounds/{{ background or 'forest' }}.jpg') no-repeat center center fixed;
-      background-size: cover;
-      color: var(--text);
+      font-family: 'Lato', sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
       min-height: 100vh;
-      overflow-x: hidden;
-      transition: all 0.5s ease;
-    }
-    body.dark { --glass: rgba(0, 0, 0, 0.9); background-color: #0d0d0d; }
-    .container { display: flex; min-height: 100vh; }
-
-    /* === HEADER === */
-    .header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      background: var(--glass);
-      backdrop-filter: blur(25px);
-      padding: 15px 40px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: var(--shadow);
-      border-bottom: 1px solid var(--glass-border);
-      z-index: 1000;
-    }
-    .header-nav {
-      display: flex;
-      gap: 20px;
-    }
-    .header-nav a {
-      color: var(--text);
-      text-decoration: none;
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 700;
-      font-size: 1.1em;
-      padding: 8px 15px;
-      border-radius: 10px;
       transition: all 0.3s ease;
     }
-    .header-nav a:hover {
-      background: rgba(var(--primary), 0.3);
-      box-shadow: var(--glow);
+    body.dark-mode {
+      --bg-color: #1a1a1a;
+      --text-color: #ffffff;
     }
-    .header .logo img { width: 150px; filter: drop-shadow(0 0 10px var(--primary)); }
+    .container {
+      display: flex;
+      min-height: 100vh;
+      padding-top: 20px;
+    }
 
-    /* === SIDEBAR === */
+    /* Sidebar */
     .sidebar {
-      width: 300px;
+      width: 280px;
       background: var(--glass);
-      backdrop-filter: blur(25px);
+      backdrop-filter: blur(10px);
       border-right: 1px solid var(--glass-border);
-      padding: 50px 25px;
+      padding: 30px 20px;
       box-shadow: var(--shadow);
       position: sticky;
       top: 0;
       height: 100vh;
-      z-index: 900;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
-    .logo { margin-bottom: 40px; }
-    .logo img { width: 150px; filter: drop-shadow(0 0 20px var(--primary)); transition: transform 0.5s ease; }
-    .logo img:hover { transform: scale(1.1); }
+    .sidebar .logo img {
+      width: 150px;
+      transition: transform 0.3s ease;
+    }
+    .sidebar .logo img:hover { transform: scale(1.05); }
     .sidebar h2 {
-      color: var(--text);
-      font-family: 'Montserrat', sans-serif;
-      font-size: 2.5em;
-      text-align: center;
-      margin-bottom: 40px;
-      text-shadow: 0 0 20px var(--primary);
-      font-weight: 900;
+      font-family: 'Poppins', sans-serif;
+      font-size: 2em;
+      color: var(--text-color);
+      margin: 20px 0;
+      font-weight: 700;
     }
     .sidebar ul {
       list-style: none;
       width: 100%;
       flex-grow: 1;
     }
-    .sidebar li {
-      margin: 20px 0;
-      display: flex;
-      align-items: center;
-    }
+    .sidebar li { margin: 15px 0; }
     .sidebar a {
       display: flex;
       align-items: center;
-      gap: 20px;
-      padding: 15px 25px;
-      color: var(--text);
+      gap: 15px;
+      padding: 12px 20px;
+      color: var(--text-color);
       text-decoration: none;
-      font-family: 'Open Sans', sans-serif;
-      font-size: 1.2em;
-      font-weight: 600;
-      border-radius: 12px;
+      font-size: 1.1em;
+      font-weight: 400;
+      border-radius: 8px;
       transition: all 0.3s ease;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid var(--glass-border);
-      box-shadow: inset 0 1px 1px rgba(255,255,255,0.2);
-      width: 100%;
     }
-    .sidebar a i {
-      font-size: 1.5em;
+    .sidebar a i { font-size: 1.3em; }
+    .sidebar a:hover {
+      background: rgba(var(--primary), 0.2);
       color: var(--primary);
     }
-    .sidebar a:hover {
-      background: rgba(var(--primary), 0.4);
-      transform: translateY(-3px);
-      box-shadow: var(--glow);
+
+    /* Main Content */
+    .main {
+      flex: 1;
+      padding: 20px;
+      background: linear-gradient(135deg, var(--bg-color), #ffffff);
     }
-    .main { flex: 1; padding: 100px 40px 40px; }
     .card {
       background: var(--glass);
-      backdrop-filter: blur(25px);
-      border-radius: 20px;
-      padding: 40px;
-      max-width: 1000px;
-      margin: auto;
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 25px;
+      max-width: 900px;
+      margin: 0 auto;
       border: 1px solid var(--glass-border);
       box-shadow: var(--shadow);
-      position: relative;
-      overflow: hidden;
-    }
-    .card::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(0, 188, 212, 0.1) 0%, transparent 70%);
-      animation: glowPulse 8s infinite;
-      z-index: -1;
-    }
-    @keyframes glowPulse {
-      0% { transform: scale(0); opacity: 0.5; }
-      50% { transform: scale(1); opacity: 0; }
-      100% { transform: scale(0); opacity: 0.5; }
     }
     h1 {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 3em;
-      text-align: center;
-      margin-bottom: 20px;
-      background: linear-gradient(90deg, var(--primary), #fff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 25px rgba(var(--primary), 0.6);
-      font-weight: 900;
+      font-family: 'Poppins', sans-serif;
+      font-size: 2.5em;
+      margin-bottom: 15px;
+      color: var(--primary);
+      font-weight: 700;
     }
     .note {
-      text-align: center;
-      font-family: 'Open Sans', sans-serif;
-      font-size: 1.1em;
-      color: var(--text);
-      margin-bottom: 25px;
+      font-size: 0.95em;
+      color: var(--text-color);
+      margin-bottom: 15px;
     }
     input, button, select, textarea {
       width: 100%;
-      padding: 18px;
-      margin: 12px 0;
+      padding: 12px;
+      margin: 8px 0;
       border: 1px solid var(--glass-border);
-      border-radius: 15px;
-      font-family: 'Open Sans', sans-serif;
+      border-radius: 8px;
+      font-family: 'Lato', sans-serif;
       font-size: 1em;
-      background: rgba(255, 255, 255, 0.15);
-      color: var(--text);
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-color);
       transition: all 0.3s ease;
-      box-shadow: inset 0 1px 1px rgba(255,255,255,0.2);
     }
-    input::placeholder, textarea::placeholder { color: rgba(var(--text), 0.6); }
     input:focus, select:focus, textarea:focus {
       outline: none;
       border-color: var(--primary);
-      box-shadow: 0 0 20px rgba(var(--primary), 0.6), inset 0 1px 1px rgba(255,255,255,0.2);
+      box-shadow: 0 0 10px rgba(var(--primary), 0.3);
     }
     button {
-      background: linear-gradient(45deg, var(--primary), #fff);
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 700;
-      cursor: pointer;
-      border: none;
-      margin-top: 20px;
-    }
-    button:hover { transform: translateY(-3px); box-shadow: var(--glow); }
-    pre {
-      background: rgba(0, 0, 0, 0.4);
-      padding: 25px;
-      border-radius: 15px;
-      white-space: pre-wrap;
-      font-family: 'Open Sans', sans-serif;
-      font-size: 0.95em;
-      border: 1px solid var(--glass-border);
-      margin-top: 25px;
-      line-height: 1.6;
-      color: var(--text);
-      box-shadow: inset 0 1px 1px rgba(255,255,255,0.2);
-    }
-    .ai-response {
-      display: flex;
-      align-items: flex-start;
-      margin: 15px 0;
-      padding: 20px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 15px;
-      border-left: 5px solid var(--primary);
-      box-shadow: inset 0 1px 1px rgba(255,255,255,0.2);
-    }
-    .ai-logo {
-      width: 40px;
-      height: 40px;
-      margin-right: 15px;
-      border-radius: 10px;
-      object-fit: contain;
-      filter: drop-shadow(0 0 8px var(--primary));
-      animation: spin 4s linear infinite;
-    }
-    .tools-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 25px;
-      margin-top: 35px;
-    }
-    .tool-card {
-      background: var(--glass);
-      padding: 30px;
-      border-radius: 18px;
-      text-align: center;
-      border: 1px solid var(--glass-border);
-      transition: all 0.3s ease;
-      box-shadow: inset 0 1px 1px rgba(255,255,255,0.2);
-    }
-    .tool-card:hover { transform: translateY(-6px); box-shadow: var(--glow); }
-    .tool-card a {
-      color: var(--text);
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 700;
-      text-decoration: none;
-      font-size: 1.2em;
-    }
-    .notification {
-      position: fixed;
-      top: 20px;
-      right: 20px;
       background: var(--primary);
-      color: var(--text);
-      padding: 15px 25px;
-      border-radius: 10px;
+      color: #ffffff;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover { background: darken(var(--primary), 10%); }
+    pre {
+      background: rgba(0, 0, 0, 0.1);
+      padding: 15px;
+      border-radius: 8px;
+      font-size: 0.9em;
+      margin-top: 15px;
+      color: var(--text-color);
+    }
+
+    /* Widgets */
+    .widgets {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+    }
+    .widget {
+      background: var(--glass);
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid var(--glass-border);
       box-shadow: var(--shadow);
-      animation: popIn 0.3s ease-out;
+      text-align: center;
     }
-    .cosmic-particles {
+    .widget h3 { font-size: 1.1em; font-weight: 600; }
+    #stockChart { max-height: 150px; }
+
+    /* News Feed */
+    .news-feed {
+      margin: 20px 0;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .news-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin: 10px 0;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+    }
+    .news-item img { width: 80px; height: 60px; object-fit: cover; border-radius: 4px; }
+    .news-item h3 { font-size: 1em; font-weight: 600; }
+    .news-item p { font-size: 0.9em; }
+
+    /* Theme Toggle */
+    .theme-toggle {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: -1;
+      top: 10px;
+      right: 10px;
+      cursor: pointer;
+      font-size: 1.5em;
+      color: var(--text-color);
     }
-    .cosmic-particle {
-      position: absolute;
-      width: 3px;
-      height: 3px;
-      background: rgba(255, 255, 255, 0.8);
-      border-radius: 50%;
-      animation: cosmicFlow 10s infinite linear;
-    }
-    @keyframes cosmicFlow {
-      0% { transform: translate(0, -100vh); opacity: 0; }
-      20% { opacity: 0.8; }
-      100% { transform: translate(0, 100vh); opacity: 0; }
-    }
-    .theme-color { color: var(--text); }
   </style>
 </head>
-<body class="{{ background or 'forest' }} {{ 'dark' if dark_mode == 'on' else '' }}">
-  <header class="header">
-    <div class="logo"><img src="/static/logo.png" alt="BoardChat Logo"></div>
-    <nav class="header-nav">
-      <a href="/">Boardroom</a>
-      <a href="/tools">Tools</a>
-      <a href="/settings">Settings</a>
-      <a href="/dashboard">Dashboard</a>
-      <a href="/logout">Logout</a>
-    </nav>
-  </header>
+<body>
+  <div class="theme-toggle" onclick="toggleTheme()">
+    <i class="fas fa-adjust"></i>
+  </div>
   <div class="container">
     <div class="sidebar">
       <div class="logo"><img src="/static/logo.png" alt="BoardChat Logo"></div>
@@ -380,18 +328,33 @@
         <li><a href="/"><i class="fas fa-users"></i> Boardroom</a></li>
         <li><a href="/tools"><i class="fas fa-tools"></i> Tools</a></li>
         <li><a href="/settings"><i class="fas fa-cog"></i> Settings</a></li>
-        <li><a href="/saved_chats"><i class="fas fa-save"></i> Saved</a></li>
-        <li><a href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-        <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+        <li><a href="/dashboard"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+        <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Sign Out</a></li>
       </ul>
     </div>
     <div class="main">
       <div class="card">
         {% block content %}{% endblock %}
+        <div class="widgets">
+          <div class="widget">
+            <h3>Time & Date</h3>
+            <p id="time"></p>
+            <p id="date"></p>
+          </div>
+          <div class="widget">
+            <h3>Weather</h3>
+            <p id="weather-temp"></p>
+            <p id="weather-condition"></p>
+            <p id="weather-icon"></p>
+          </div>
+          <div class="widget">
+            <h3>Stock Market</h3>
+            <canvas id="stockChart"></canvas>
+          </div>
+        </div>
+        <div class="news-feed" id="news-feed"></div>
       </div>
     </div>
   </div>
-  <div class="cosmic-particles"></div>
-  <div id="notification"></div>
 </body>
 </html>
