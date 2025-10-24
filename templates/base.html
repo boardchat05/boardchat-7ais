@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}BoardChat{% endblock %}</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet"> <!-- Added lighter weights for variety -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
@@ -19,8 +19,12 @@
     document.addEventListener('DOMContentLoaded', () => {
       if (localStorage.getItem('dark_mode') === 'on') document.body.classList.add('dark');
       updateTheme();
-      animateElements();
-      createParticles(); // New particle effect
+      // Ensure content loads immediately
+      document.querySelectorAll('.animate-fade, .animate-slide').forEach(el => {
+        el.classList.add('fade-in', 'slide-in');
+        el.style.opacity = '1';
+        el.style.transform = 'translateX(0)';
+      });
     });
     // Theme Update
     function updateTheme() {
@@ -28,31 +32,6 @@
       document.querySelectorAll('.theme-color').forEach(el => {
         el.style.color = isDark ? '#ffffff' : '#000000';
       });
-    }
-    // Advanced Animations
-    function animateElements() {
-      document.querySelectorAll('.animate-fade').forEach(el => {
-        el.style.opacity = '0';
-        setTimeout(() => el.classList.add('fade-in'), 100);
-      });
-      document.querySelectorAll('.animate-slide').forEach(el => {
-        el.style.transform = 'translateX(-30px)';
-        el.style.opacity = '0';
-        setTimeout(() => el.classList.add('slide-in'), 150);
-      });
-    }
-    // Particle Effect (Futuristic Sparkles)
-    function createParticles() {
-      const particleContainer = document.createElement('div');
-      particleContainer.className = 'particles';
-      document.body.appendChild(particleContainer);
-      for (let i = 0; i < 50; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        particle.style.left = `${Math.random() * 100}vw`;
-        particle.style.animationDelay = `${Math.random() * 5}s`;
-        particleContainer.appendChild(particle);
-      }
     }
     // Notification Popup
     function showNotification(message) {
@@ -65,11 +44,11 @@
   </script>
   <style>
     :root {
-      --glass: rgba(255, 255, 255, 0.15); /* Enhanced glass opacity */
+      --glass: rgba(255, 255, 255, 0.15);
       --glass-border: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
-      --text: #ffffff; /* White fonts globally */
-      --shadow: 0 15px 45px rgba(0, 0, 0, 0.5); /* Deeper shadows for realism */
-      --refract: inset 0 1px 1px rgba(255,255,255,0.2); /* Refractive effect */
+      --text: #ffffff;
+      --shadow: 0 15px 45px rgba(0, 0, 0, 0.5);
+      --primary: #00bcd4;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -84,55 +63,6 @@
     body.dark { --glass: rgba(0, 0, 0, 0.85); background-color: #1a1a1a; color: #ffffff; }
     .container { display: flex; min-height: 100vh; }
 
-    /* === HEADER === */
-    .header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      background: var(--glass);
-      backdrop-filter: blur(20px);
-      padding: 15px 40px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: var(--shadow);
-      z-index: 1000;
-      border-bottom: 1px solid var(--glass-border);
-      animation: slideDown 0.5s ease-out;
-    }
-    @keyframes slideDown {
-      from { transform: translateY(-100%); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-    .header h1 {
-      font-size: 2em;
-      font-weight: 900;
-      background: linear-gradient(90deg, var(--primary), #ffffff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 15px var(--primary);
-      margin: 0;
-    }
-    .header .search {
-      display: flex;
-      align-items: center;
-      background: rgba(255,255,255,0.1);
-      border-radius: 30px;
-      padding: 10px 20px;
-      border: 1px solid var(--glass-border);
-      width: 300px;
-    }
-    .header .search input {
-      background: transparent;
-      border: none;
-      color: var(--text);
-      font-size: 1em;
-      width: 100%;
-      outline: none;
-    }
-    .header .search i { color: var(--text); margin-right: 10px; }
-
     /* === SIDEBAR === */
     .sidebar {
       width: 280px;
@@ -144,13 +74,12 @@
       position: sticky;
       top: 0;
       height: 100vh;
-      animation: slideIn 0.5s ease-out;
     }
     .logo {
       text-align: center;
       margin-bottom: 40px;
     }
-    .logo img { width: 80px; filter: drop-shadow(0 0 15px var(--primary)); animation: pulse 2s infinite; }
+    .logo img { width: 80px; filter: drop-shadow(0 0 15px var(--primary)); }
     .sidebar h2 {
       color: var(--text);
       font-size: 1.8em;
@@ -180,7 +109,7 @@
       transform: translateY(-2px);
       box-shadow: 0 5px 15px rgba(var(--primary), 0.4);
     }
-    .main { flex: 1; padding: 80px 40px 40px; } /* Adjusted for header */
+    .main { flex: 1; padding: 40px; }
     .card {
       background: var(--glass);
       backdrop-filter: blur(20px);
@@ -190,10 +119,11 @@
       margin: auto;
       border: 1px solid var(--glass-border);
       box-shadow: var(--shadow);
-      animation: fadeInUp 0.5s ease-out;
     }
-    .animate-fade { opacity: 0; animation: fadeIn 0.5s ease-out forwards; }
-    .animate-slide { opacity: 0; transform: translateX(-20px); animation: slideInLeft 0.5s ease-out forwards; }
+    .animate-fade { opacity: 1; }
+    .fade-in { opacity: 1; transition: opacity 0.5s ease; }
+    .animate-slide { opacity: 1; transform: translateX(0); }
+    .slide-in { opacity: 1; transform: translateX(0); transition: all 0.5s ease; }
     h1 {
       font-size: 2.8em;
       text-align: center;
@@ -203,7 +133,6 @@
       -webkit-text-fill-color: transparent;
       text-shadow: 0 0 20px rgba(var(--primary), 0.5);
       font-weight: 900;
-      animation: bounceIn 1s ease-out;
     }
     .note { text-align: center; font-size: 0.95em; color: var(--text); margin-bottom: 25px; }
     input, button {
@@ -225,7 +154,6 @@
       cursor: pointer;
       border: none;
       margin-top: 15px;
-      animation: slideInButton 0.5s ease-out;
     }
     button:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(var(--primary), 0.4); }
     pre {
@@ -238,7 +166,6 @@
       margin-top: 20px;
       line-height: 1.6;
       color: var(--text);
-      animation: fadeIn 0.5s ease-out;
     }
     .ai-response {
       display: flex;
@@ -248,7 +175,6 @@
       background: rgba(255,255,255,0.05);
       border-radius: 14px;
       border-left: 4px solid var(--primary);
-      animation: slideInLeft 0.5s ease-out;
     }
     .ai-logo {
       width: 32px;
@@ -257,7 +183,6 @@
       border-radius: 8px;
       object-fit: contain;
       filter: drop-shadow(0 0 5px var(--primary));
-      animation: spin 4s linear infinite;
     }
     .tools-grid {
       display: grid;
@@ -272,7 +197,6 @@
       text-align: center;
       border: 1px solid var(--glass-border);
       transition: all 0.3s ease;
-      animation: zoomIn 0.5s ease-out;
     }
     .tool-card:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
     .tool-card a { color: var(--text); font-weight: bold; text-decoration: none; font-size: 1.1em; }
@@ -285,44 +209,13 @@
       padding: 15px 25px;
       border-radius: 10px;
       box-shadow: var(--shadow);
-      animation: popIn 0.3s ease-out;
     }
     .theme-color { color: var(--text); }
-    .particles {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: -1;
-    }
-    .particle {
-      position: absolute;
-      width: 5px;
-      height: 5px;
-      background: #ffffff;
-      border-radius: 50%;
-      animation: sparkle 5s infinite linear;
-      opacity: 0;
-    }
-    @keyframes sparkle {
-      0% { opacity: 0; transform: translate(0, 0); }
-      50% { opacity: 0.8; }
-      100% { opacity: 0; transform: translate(0, 100vh); }
-    }
   </style>
 </head>
 <body class="{{ background or 'forest' }} {{ 'dark' if dark_mode == 'on' else '' }}">
-  <header class="header animate-fade">
-    <h1>BoardChat</h1>
-    <div class="search">
-      <i class="fas fa-search"></i>
-      <input type="text" placeholder="Search Chats...">
-    </div>
-  </header>
   <div class="container">
-    <div class="sidebar animate-slide">
+    <div class="sidebar">
       <div class="logo">
         <img src="/static/logo.png" alt="BoardChat Logo">
       </div>
@@ -337,14 +230,11 @@
       </ul>
     </div>
     <div class="main">
-      <div class="card animate-fade">
+      <div class="card">
         {% block content %}{% endblock %}
       </div>
     </div>
   </div>
-  <footer class="footer">
-    <p>&copy; 2025 BoardChat. All rights reserved.</p>
-  </footer>
-  <div class="particles"></div>
+  <div id="notification"></div>
 </body>
 </html>
