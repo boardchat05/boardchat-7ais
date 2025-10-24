@@ -52,7 +52,7 @@ def index():
         for a in AI_CONFIGS: session[f'{a}_key'] = request.form.get(f'{a}_key','').strip()
         query = request.form.get('query','').strip()
         if query: result = run_boardroom(query)
-    return render_template('index.html', result=result, ai_keys=keys, theme=session.get('theme', 'blue'), dark_mode=session.get('dark_mode', 'off'))
+    return render_template('index.html', result=result, ai_keys=keys, theme=session.get('theme', 'forest'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
 
 @app.route('/idea_eval', methods=['GET','POST'])
 def idea_eval():
@@ -61,7 +61,7 @@ def idea_eval():
     if request.method == 'POST':
         query = request.form.get('query','').strip()
         if query: result = run_boardroom(query, "Evaluate: {query}\nPros, cons, market fit (1-10), revenue. Be concise.")
-    return render_template('idea_eval.html', result=result, ai_keys=keys, theme=session.get('theme', 'blue'), dark_mode=session.get('dark_mode', 'off'))
+    return render_template('idea_eval.html', result=result, ai_keys=keys, theme=session.get('theme', 'forest'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
 
 @app.route('/market_research', methods=['GET','POST'])
 def market_research():
@@ -70,7 +70,7 @@ def market_research():
     if request.method == 'POST':
         query = request.form.get('query','').strip()
         if query: result = run_boardroom(query, "Market research for: {query}\nTrends, opportunities, challenges. Be concise.")
-    return render_template('market_research.html', result=result, ai_keys=keys, theme=session.get('theme', 'blue'), dark_mode=session.get('dark_mode', 'off'))
+    return render_template('market_research.html', result=result, ai_keys=keys, theme=session.get('theme', 'forest'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
 
 @app.route('/competitive_analysis', methods=['GET','POST'])
 def competitive_analysis():
@@ -79,7 +79,7 @@ def competitive_analysis():
     if request.method == 'POST':
         query = request.form.get('query','').strip()
         if query: result = run_boardroom(query, "Competitor analysis: {query}\nStrengths, weaknesses, recommendations. Be concise.")
-    return render_template('competitive_analysis.html', result=result, ai_keys=keys, theme=session.get('theme', 'blue'), dark_mode=session.get('dark_mode', 'off'))
+    return render_template('competitive_analysis.html', result=result, ai_keys=keys, theme=session.get('theme', 'forest'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
 
 @app.route('/financial_projections', methods=['GET','POST'])
 def financial_projections():
@@ -88,29 +88,31 @@ def financial_projections():
     if request.method == 'POST':
         query = request.form.get('query','').strip()
         if query: result = run_boardroom(query, "Financial projections for: {query}\nRevenue, costs, profit (3 years). Be concise.")
-    return render_template('financial_projections.html', result=result, ai_keys=keys, theme=session.get('theme', 'blue'), dark_mode=session.get('dark_mode', 'off'))
+    return render_template('financial_projections.html', result=result, ai_keys=keys, theme=session.get('theme', 'forest'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
 
 @app.route('/settings', methods=['GET','POST'])
 def settings():
     if request.method == 'POST':
-        # Save theme, mode, and review
-        session['theme'] = request.form.get('theme', 'blue')
+        # Save theme, mode, review, and background
+        session['theme'] = request.form.get('theme', 'forest')
         session['dark_mode'] = 'on' if 'dark_mode' in request.form else 'off'
         session['review'] = request.form.get('review', '')
         session['share_link'] = 'https://boardchat-7ais.onrender.com'  # Your app link
+        session['background'] = request.form.get('background', 'forest')
         return redirect(url_for('index'))
     
     # Load current settings
-    current_theme = session.get('theme', 'blue')
+    current_theme = session.get('theme', 'forest')
     current_mode = session.get('dark_mode', 'off')
     current_review = session.get('review', '')
+    current_background = session.get('background', 'forest')
     
-    return render_template('settings.html', theme=current_theme, dark_mode=current_mode, review=current_review)
+    return render_template('settings.html', theme=current_theme, dark_mode=current_mode, review=current_review, background=current_background)
 
 @app.route('/saved_chats')
 def saved_chats():
     result = session.get('last_chat', 'No saved chats yet.')
-    return render_template('saved_chats.html', result=result, theme=session.get('theme', 'blue'), dark_mode=session.get('dark_mode', 'off'))
+    return render_template('saved_chats.html', result=result, theme=session.get('theme', 'forest'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
 
 @app.route('/logout')
 def logout():
@@ -119,7 +121,7 @@ def logout():
 
 @app.route('/tools')
 def tools():
-    return render_template('tools.html', theme=session.get('theme', 'blue'), dark_mode=session.get('dark_mode', 'off'))
+    return render_template('tools.html', theme=session.get('theme', 'forest'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
