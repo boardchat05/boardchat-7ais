@@ -1,20 +1,23 @@
 {% extends "base.html" %}
-{% block title %}Dashboard{% endblock %}
+{% block title %}Dashboard - BoardChat Enterprise{% endblock %}
 {% block content %}
 <h1>Dashboard</h1>
-<div class="dashboard">
-  <div class="dashboard-item">
-    <h3>Active Chats</h3>
-    <p>{{ chats }}</p>
+<div class="widgets">
+  <div class="widget">
+    <h3>Time & Date</h3>
+    <p id="time"></p>
+    <p id="date"></p>
   </div>
-  <div class="dashboard-item">
-    <h3>AI Votes</h3>
-    <p>{{ votes }}</p>
+  <div class="widget">
+    <h3>Weather</h3>
+    <p id="weather-temp"></p>
+    <p id="weather-condition"></p>
+    <p id="weather-icon"></p>
   </div>
-  <div class="dashboard-item">
-    <h3>Active Users</h3>
-    <p>{{ users }}</p>
+  <div class="widget">
+    <h3>Stock Market</h3>
+    <canvas id="stockChart"></canvas>
   </div>
 </div>
-<button onclick="showNotification('Dashboard updated!')">Refresh Stats</button>
+<div class="news-feed" id="news-feed"></div>
 {% endblock %}
