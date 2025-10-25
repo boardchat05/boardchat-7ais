@@ -16,7 +16,8 @@
     }
     body {
       font-family: 'Lato', sans-serif;
-      background: var(--bg-color);
+      background: var(--bg-color) url('/static/backgrounds/{{ session.get("background", "forest") }}.jpg') no-repeat center center fixed;
+      background-size: cover;
       color: var(--text-color);
       min-height: 100vh;
       display: flex;
@@ -69,7 +70,7 @@
       border-radius: 8px;
       cursor: pointer;
     }
-    .auth-card button:hover { background: darken(var(--primary), 10%); }
+    .auth-card button:hover { background: #0056b3; }
     .auth-card .error { color: #ff4444; margin-top: 10px; font-size: 0.9em; }
     .auth-card .signup-link { margin-top: 15px; font-size: 0.9em; }
     .auth-card .signup-link a { color: var(--primary); text-decoration: none; }
