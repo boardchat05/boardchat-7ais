@@ -2,35 +2,15 @@
 {% block title %}Boardroom{% endblock %}
 {% block content %}
 <h1>AI Boardroom</h1>
-<p class="note">6 AIs vote on your idea — enter keys below</p>
-
+<div class="note">6 AIs compete to provide the best insights—enter your API keys below.</div>
 <form method="post">
   <input type="password" name="openai_key" placeholder="OpenAI Key" value="{{ ai_keys.openai }}">
   <input type="password" name="gemini_key" placeholder="Gemini Key" value="{{ ai_keys.gemini }}">
   <input type="password" name="llama_key" placeholder="OpenRouter Key" value="{{ ai_keys.llama }}">
-  <input type="text" name="query" placeholder="Best startup idea?" required>
-  <button>Convene Boardroom</button>
+  <input type="text" name="query" placeholder="Enter your query...">
+  <button type="submit">Convene Boardroom</button>
 </form>
-
 {% if result %}
-  {% set responses = result.split('---')[1]|default('') %}
-  {% if 'All Answers' in result %}
-    {% set answers = result.split('**All Answers:**')[1].split('**') %}
-    {% for part in answers %}
-      {% if ':' in part and part.strip() %}
-        {% set ai_name = part.split(':')[0].strip().upper() %}
-        {% set ai_text = part.split(':', 1)[1] %}
-        <div class="ai-response">
-          <img src="/static/ai/{{ ai_name|lower }}.png" class="ai-logo" alt="{{ ai_name }}">
-          <div>
-            <strong>{{ ai_name }}:</strong><br>
-            {{ ai_text|safe }}
-          </div>
-        </div>
-      {% endif %}
-    {% endfor %}
-  {% else %}
-    <pre>{{ result }}</pre>
-  {% endif %}
+  <pre>{{ result }}</pre>
 {% endif %}
 {% endblock %}
