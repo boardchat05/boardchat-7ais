@@ -11,6 +11,10 @@ app.secret_key = 'boardchat2025rulez'
 # Mock database for users (replace with real DB like SQLite in production)
 USERS = {}  # email: hashed_password
 
+# API Keys (Replace with your own)
+WEATHER_API_KEY = 'YOUR_OPENWEATHERMAP_API_KEY'
+NEWS_API_KEY = 'YOUR_NEWSAPI_KEY'
+
 AI_CONFIGS = {
     'openai': {
         'model': 'gpt-4o-mini',
