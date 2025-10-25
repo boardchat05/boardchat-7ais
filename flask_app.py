@@ -9,9 +9,7 @@ app = Flask(__name__)
 app.secret_key = 'boardchat2025rulez'
 
 # Mock database for users (replace with real DB like SQLite in production)
-USERS = {  # username: hashed_password
-    'admin': generate_password_hash('password123')
-}
+USERS = {}  # email: hashed_password
 
 AI_CONFIGS = {
     'openai': {
@@ -61,7 +59,7 @@ AI_CONFIGS = {
 def run_boardroom(query, prompt="{query}"):
     active_ais = {ai: config for ai, config in AI_CONFIGS.items() if session.get(f'{ai}_key')}
     if len(active_ais) < 2:
-        return "Need 2+ API keys for boardroom voting."
+        return "Require at least 2 API keys for boardroom voting."
     responses = {}
     for ai, config in active_ais.items():
         try:
@@ -76,7 +74,7 @@ def run_boardroom(query, prompt="{query}"):
         except Exception as e:
             responses[ai] = f"[ERROR] {ai.upper()}: {str(e)}"
     numbered = "\n".join([f"{i+1}. {ai.upper()}: {r}" for i, (ai, r) in enumerate(responses.items())])
-    vote_prompt = f"Vote for best. Reply ONLY with number:\n{numbered}"
+    vote_prompt = f"Vote for the best response. Reply ONLY with a number:\n{numbered}"
     votes = {i+1: 0 for i in range(len(responses))}
     for ai, config in active_ais.items():
         try:
@@ -91,7 +89,7 @@ def run_boardroom(query, prompt="{query}"):
         except: pass
     best = max(votes, key=votes.get)
     winner = list(responses.keys())[best-1].upper()
-    result = f"**{winner} WINS ({votes[best]} votes)!**\n\n{responses[winner.lower()]}\n\n---\n\n**All Answers:**\n" + "\n\n".join([f"**{a.upper()}:**\n{r}" for a, r in responses.items()])
+    result = f"**{winner} WINS ({votes[best]} votes)!**\n\n{responses[winner.lower()]}\n\n---\n\n**All Responses:**\n" + "\n\n".join([f"**{a.upper()}:**\n{r}" for a, r in responses.items()])
     session['last_chat'] = result
     return result
 
@@ -107,30 +105,34 @@ def index():
         query = request.form.get('query', '').strip()
         if query:
             result = run_boardroom(query)
-    return render_template('index.html', result=result, ai_keys=ai_keys, theme=session.get('theme', 'forest'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
+    return render_template('index.html', result=result, ai_keys=ai_keys, theme=session.get('theme', 'light'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        if username in USERS and check_password_hash(USERS[username], password):
+        email = request.form.get('email')
+        password = request.form.get('password')
+        if not email or not password:
+            return render_template('login.html', error="Email and password are required")
+        if email in USERS and check_password_hash(USERS[email], password):
             session['logged_in'] = True
-            session['username'] = username
+            session['email'] = email
             return redirect(url_for('index'))
-        return render_template('login.html', error="Invalid credentials")
+        return render_template('login.html', error="Invalid email or password")
     return render_template('login.html')
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        if username in USERS:
-            return render_template('signup.html', error="Username already exists")
-        USERS[username] = generate_password_hash(password)
+        email = request.form.get('email')
+        password = request.form.get('password')
+        if not email or not password:
+            return render_template('signup.html', error="Email and password are required")
+        if email in USERS:
+            return render_template('signup.html', error="Email already registered")
+        USERS[email] = generate_password_hash(password)
         session['logged_in'] = True
-        session['username'] = username
+        session['email'] = email
         return redirect(url_for('index'))
     return render_template('signup.html')
 
@@ -139,20 +141,22 @@ def change_password():
     if 'logged_in' not in session or not session['logged_in']:
         return redirect(url_for('login'))
     if request.method == 'POST':
-        old_password = request.form['old_password']
-        new_password = request.form['new_password']
-        username = session['username']
-        if check_password_hash(USERS[username], old_password):
-            USERS[username] = generate_password_hash(new_password)
-            return redirect(url_for('settings', success="Password changed successfully"))
-        return redirect(url_for('change_password', error="Invalid old password"))
+        email = session['email']
+        old_password = request.form.get('old_password')
+        new_password = request.form.get('new_password')
+        if not old_password or not new_password:
+            return redirect(url_for('change_password', error="All fields are required"))
+        if check_password_hash(USERS[email], old_password):
+            USERS[email] = generate_password_hash(new_password)
+            return redirect(url_for('settings', success="Password updated successfully"))
+        return redirect(url_for('change_password', error="Incorrect current password"))
     return render_template('change_password.html', success=request.args.get('success'), error=request.args.get('error'))
 
 @app.route('/tools', methods=['GET'])
 def tools():
     if 'logged_in' not in session or not session['logged_in']:
         return redirect(url_for('login'))
-    return render_template('tools.html', theme=session.get('theme', 'forest'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
+    return render_template('tools.html', theme=session.get('theme', 'light'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
 
 @app.route('/idea_eval', methods=['GET', 'POST'])
 def idea_eval():
@@ -164,7 +168,7 @@ def idea_eval():
         query = request.form.get('query', '').strip()
         if query:
             result = run_boardroom(query, "Evaluate: {query}\nPros, cons, market fit (1-10), revenue. Be concise.")
-    return render_template('idea_eval.html', result=result, ai_keys=ai_keys, theme=session.get('theme', 'forest'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
+    return render_template('idea_eval.html', result=result, ai_keys=ai_keys, theme=session.get('theme', 'light'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
 
 @app.route('/market_research', methods=['GET', 'POST'])
 def market_research():
@@ -176,7 +180,7 @@ def market_research():
         query = request.form.get('query', '').strip()
         if query:
             result = run_boardroom(query, "Market research for: {query}\nTrends, opportunities, challenges. Be concise.")
-    return render_template('market_research.html', result=result, ai_keys=ai_keys, theme=session.get('theme', 'forest'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
+    return render_template('market_research.html', result=result, ai_keys=ai_keys, theme=session.get('theme', 'light'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
 
 @app.route('/competitive_analysis', methods=['GET', 'POST'])
 def competitive_analysis():
@@ -188,7 +192,7 @@ def competitive_analysis():
         query = request.form.get('query', '').strip()
         if query:
             result = run_boardroom(query, "Competitor analysis: {query}\nStrengths, weaknesses, recommendations. Be concise.")
-    return render_template('competitive_analysis.html', result=result, ai_keys=ai_keys, theme=session.get('theme', 'forest'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
+    return render_template('competitive_analysis.html', result=result, ai_keys=ai_keys, theme=session.get('theme', 'light'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
 
 @app.route('/financial_projections', methods=['GET', 'POST'])
 def financial_projections():
@@ -200,20 +204,19 @@ def financial_projections():
         query = request.form.get('query', '').strip()
         if query:
             result = run_boardroom(query, "Financial projections for: {query}\nRevenue, costs, profit (3 years). Be concise.")
-    return render_template('financial_projections.html', result=result, ai_keys=ai_keys, theme=session.get('theme', 'forest'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
+    return render_template('financial_projections.html', result=result, ai_keys=ai_keys, theme=session.get('theme', 'light'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
 
 @app.route('/settings', methods=['GET', 'POST'])
 def settings():
     if 'logged_in' not in session or not session['logged_in']:
         return redirect(url_for('login'))
     if request.method == 'POST':
-        session['theme'] = request.form.get('theme', 'forest')
-        session['dark_mode'] = 'on' if 'dark_mode' in request.form else 'off'
-        session['review'] = request.form.get('review', '')
-        session['share_link'] = 'https://boardchat-7ais.onrender.com'
+        session['theme'] = request.form.get('theme', 'light')
+        session['dark_mode'] = 'on' if request.form.get('theme') == 'dark' else 'off'
         session['background'] = request.form.get('background', 'forest')
+        session['review'] = request.form.get('review', '')
         return redirect(url_for('index'))
-    current_theme = session.get('theme', 'forest')
+    current_theme = session.get('theme', 'light')
     current_mode = session.get('dark_mode', 'off')
     current_review = session.get('review', '')
     current_background = session.get('background', 'forest')
@@ -224,7 +227,7 @@ def saved_chats():
     if 'logged_in' not in session or not session['logged_in']:
         return redirect(url_for('login'))
     result = session.get('last_chat', 'No saved chats yet.')
-    return render_template('saved_chats.html', result=result, theme=session.get('theme', 'forest'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
+    return render_template('saved_chats.html', result=result, theme=session.get('theme', 'light'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
 
 @app.route('/logout')
 def logout():
@@ -235,7 +238,7 @@ def logout():
 def dashboard():
     if 'logged_in' not in session or not session['logged_in']:
         return redirect(url_for('login'))
-    return render_template('dashboard.html', chats=12, votes=45, users=8, theme=session.get('theme', 'forest'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
+    return render_template('dashboard.html', chats=12, votes=45, users=8, theme=session.get('theme', 'light'), dark_mode=session.get('dark_mode', 'off'), background=session.get('background', 'forest'))
 
 @app.route('/static/<path:path>')
 def send_static(path):
